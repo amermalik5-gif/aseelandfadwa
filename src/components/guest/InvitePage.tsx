@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { event, eventDate, rsvpClosed } from "@/config/event";
 import {
+  formatAgendaTime,
   formatDeadline,
   formatEventDate,
   formatEventTime,
@@ -116,22 +117,81 @@ export async function InvitePage({
             <span>{formatEventTime(locale)}</span>
           </div>
 
-          <div className="mt-2 flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:gap-4">
-            <a
-              href={`/api/ics?lang=${locale}`}
-              className="tracked min-h-12 border border-olive-700/50 px-6 py-3.5 text-[11px] text-ink transition-colors hover:border-olive-700 hover:bg-olive-700 hover:text-cream"
-            >
-              {t("details.calendar")}
-            </a>
-            <a
-              href={event.mapsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="tracked min-h-12 border border-olive-700/50 px-6 py-3.5 text-[11px] text-ink transition-colors hover:border-olive-700 hover:bg-olive-700 hover:text-cream"
-            >
-              {t("details.location")}
-            </a>
+          <a
+            href={`/api/ics?lang=${locale}`}
+            className="tracked mt-2 min-h-12 w-full max-w-xs border border-olive-700/50 px-6 py-3.5 text-center text-[11px] text-ink transition-colors hover:border-olive-700 hover:bg-olive-700 hover:text-cream sm:w-auto"
+          >
+            {t("details.calendar")}
+          </a>
+        </Reveal>
+      </section>
+
+      {/* ── Location ──────────────────────────────────────── */}
+      <section className="grain bg-ivory-100 px-6 py-20 sm:py-24">
+        <Reveal className="mx-auto flex max-w-lg flex-col items-center gap-6 text-center">
+          <h2 className="tracked text-xs text-ink-soft">{t("location.title")}</h2>
+          <div>
+            <p className="type-display text-3xl text-ink sm:text-4xl">
+              {ar ? event.venueAr : event.venueEn}
+            </p>
+            <p className="mt-2 text-sm text-ink-soft">
+              {ar ? event.venueAreaAr : event.venueAreaEn}
+            </p>
           </div>
+          <a
+            href={event.mapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="tracked flex min-h-14 w-full max-w-md items-center justify-center bg-olive-700 px-6 py-4 text-xs text-cream transition-opacity hover:opacity-90"
+          >
+            {t("location.button")}
+          </a>
+        </Reveal>
+      </section>
+
+      {/* ── Agenda: wedding-day timeline ──────────────────── */}
+      <section className="grain bg-ivory-50 px-6 py-20 sm:py-28">
+        <Reveal className="mx-auto w-full max-w-lg">
+          <h2 className="tracked text-center text-xs text-ink-soft">
+            {t("agenda.title")}
+          </h2>
+          <ol className="mx-auto mt-12 w-fit min-w-64">
+            {event.agenda.map((stop, i) => {
+              const area = ar ? stop.areaAr : stop.areaEn;
+              const last = i === event.agenda.length - 1;
+              return (
+                <li key={stop.key} className="relative ps-8 pb-12 last:pb-0">
+                  {!last && (
+                    <span
+                      aria-hidden="true"
+                      className="absolute bottom-0 start-[4.5px] top-4 w-px bg-brass/35"
+                    />
+                  )}
+                  <span
+                    aria-hidden="true"
+                    className="absolute start-0 top-2 block size-2.5 rotate-45 border border-brass bg-ivory-50"
+                  />
+                  <p className="type-display text-2xl text-ink">
+                    {formatAgendaTime(locale, stop.time)}
+                  </p>
+                  <p className="mt-1.5 text-base font-medium text-ink">
+                    {t(`agenda.stops.${stop.key}`)}
+                  </p>
+                  {area && (
+                    <p className="mt-0.5 text-sm text-ink-soft">{area}</p>
+                  )}
+                  <a
+                    href={stop.mapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="tracked mt-3 inline-block border-b border-brass pb-0.5 text-[11px] text-ink-soft transition-colors hover:text-ink"
+                  >
+                    {t("agenda.map")}
+                  </a>
+                </li>
+              );
+            })}
+          </ol>
         </Reveal>
       </section>
 
@@ -146,6 +206,20 @@ export async function InvitePage({
           <p className="text-sm leading-relaxed text-ink-soft">
             {t("countdown.closing")}
           </p>
+        </Reveal>
+      </section>
+
+      {/* ── A kind note: adults-only ──────────────────────── */}
+      <section className="bg-olive-900 px-6 py-16 text-center text-cream sm:py-20">
+        <Reveal className="mx-auto flex max-w-md flex-col items-center gap-5">
+          <p className="tracked text-[11px] text-cream-dim">
+            {t("children.kicker")}
+          </p>
+          <RuleDiamond className="w-32 text-brass" />
+          <p className="text-base leading-loose text-cream/95">
+            {t("children.body")}
+          </p>
+          <p className="text-xs text-cream-dim">{t("children.thanks")}</p>
         </Reveal>
       </section>
 

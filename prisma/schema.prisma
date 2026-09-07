@@ -8,12 +8,16 @@ datasource db {
 }
 
 model Invitation {
-  id        String   @id @default(cuid())
-  code      String   @unique
+  id        String    @id @default(cuid())
+  code      String    @unique
   name      String
-  maxGuests Int      @default(1)
+  maxGuests Int       @default(1)
   phone     String?
-  createdAt DateTime @default(now())
+  sentAt    DateTime?
+  viewedAt  DateTime?
+  notes     String?
+  tableNo   String?
+  createdAt DateTime  @default(now())
   rsvp      Rsvp?
 }
 

@@ -11,6 +11,10 @@ export type InvitationDto = {
   name: string;
   maxGuests: number;
   phone: string | null;
+  sentAt: string | null;
+  viewedAt: string | null;
+  notes: string | null;
+  tableNo: string | null;
   createdAt: string;
   rsvp: RsvpDto | null;
 };

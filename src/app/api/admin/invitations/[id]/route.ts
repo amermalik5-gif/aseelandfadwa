@@ -4,19 +4,39 @@ import { requireAdmin } from "@/lib/adminGuard";
 
 type Params = { params: Promise<{ id: string }> };
 
+function cleanString(v: unknown, max: number): string | null {
+  return typeof v === "string" && v.trim() ? v.trim().slice(0, max) : null;
+}
+
 export async function PATCH(req: NextRequest, { params }: Params) {
   const denied = await requireAdmin();
   if (denied) return denied;
   const { id } = await params;
 
-  let body: { name?: unknown; maxGuests?: unknown; phone?: unknown };
+  let body: {
+    name?: unknown;
+    maxGuests?: unknown;
+    phone?: unknown;
+    notes?: unknown;
+    tableNo?: unknown;
+    sent?: unknown;
+    reply?: unknown;
+  };
   try {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "bad json" }, { status: 400 });
   }
 
-  const data: { name?: string; maxGuests?: number; phone?: string | null } = {};
+  const data: {
+    name?: string;
+    maxGuests?: number;
+    phone?: string | null;
+    notes?: string | null;
+    tableNo?: string | null;
+    sentAt?: Date | null;
+  } = {};
+
   if (typeof body.name === "string" && body.name.trim()) {
     data.name = body.name.trim().slice(0, 160);
   }
@@ -24,23 +44,55 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     const n = Number(body.maxGuests);
     if (Number.isFinite(n) && n >= 1) data.maxGuests = Math.min(Math.floor(n), 50);
   }
-  if (body.phone !== undefined) {
-    data.phone =
-      typeof body.phone === "string" && body.phone.trim()
-        ? body.phone.trim().slice(0, 24)
-        : null;
-  }
+  if (body.phone !== undefined) data.phone = cleanString(body.phone, 24);
+  if (body.notes !== undefined) data.notes = cleanString(body.notes, 1000);
+  if (body.tableNo !== undefined) data.tableNo = cleanString(body.tableNo, 20);
+  if (body.sent !== undefined) data.sentAt = body.sent ? new Date() : null;
 
-  try {
-    const invitation = await prisma.invitation.update({
-      where: { id },
-      data,
-      include: { rsvp: true },
-    });
-    return NextResponse.json({ invitation });
-  } catch {
+  const existing = await prisma.invitation.findUnique({ where: { id } });
+  if (!existing) {
     return NextResponse.json({ error: "not found" }, { status: 404 });
   }
+
+  // Planner recording (or clearing) a reply on the family's behalf
+  const reply = body.reply as
+    | { attending?: unknown; guestNames?: unknown; mobile?: unknown }
+    | null
+    | undefined;
+
+  if (reply === null) {
+    await prisma.rsvp.deleteMany({ where: { invitationId: id } });
+  } else if (reply && typeof reply === "object") {
+    if (typeof reply.attending !== "boolean") {
+      return NextResponse.json({ error: "invalid reply" }, { status: 400 });
+    }
+    const maxGuests = data.maxGuests ?? existing.maxGuests;
+    const names = Array.isArray(reply.guestNames)
+      ? reply.guestNames
+          .filter((n): n is string => typeof n === "string")
+          .map((n) => n.trim())
+          .filter(Boolean)
+          .slice(0, maxGuests)
+          .map((n) => n.slice(0, 120))
+      : [];
+    const rsvpData = {
+      attending: reply.attending,
+      guestNames: reply.attending ? names : [],
+      mobile: cleanString(reply.mobile, 24),
+    };
+    await prisma.rsvp.upsert({
+      where: { invitationId: id },
+      create: { invitationId: id, locale: "ar", ...rsvpData },
+      update: rsvpData,
+    });
+  }
+
+  const invitation = await prisma.invitation.update({
+    where: { id },
+    data,
+    include: { rsvp: true },
+  });
+  return NextResponse.json({ invitation });
 }
 
 export async function DELETE(_req: NextRequest, { params }: Params) {

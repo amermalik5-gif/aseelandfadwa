@@ -22,6 +22,10 @@ export default async function DashboardPage() {
     name: inv.name,
     maxGuests: inv.maxGuests,
     phone: inv.phone,
+    sentAt: inv.sentAt?.toISOString() ?? null,
+    viewedAt: inv.viewedAt?.toISOString() ?? null,
+    notes: inv.notes,
+    tableNo: inv.tableNo,
     createdAt: inv.createdAt.toISOString(),
     rsvp: inv.rsvp
       ? {

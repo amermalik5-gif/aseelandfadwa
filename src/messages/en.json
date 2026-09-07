@@ -14,6 +14,24 @@
     "calendar": "Add to calendar",
     "location": "View location"
   },
+  "location": {
+    "title": "Location",
+    "button": "Open the venue in Google Maps"
+  },
+  "agenda": {
+    "title": "The Wedding Day",
+    "map": "View location",
+    "stops": {
+      "groom": "Groom's house",
+      "bride": "Bride's house",
+      "venue": "EVA Hall"
+    }
+  },
+  "children": {
+    "kicker": "A kind note",
+    "body": "Our joy grows with your presence, and we kindly ask you to leave your little ones in safe care at home.",
+    "thanks": "Thank you for your understanding"
+  },
   "countdown": {
     "title": "The Wedding Night",
     "subtitle": "The wait is almost over",
@@ -81,14 +99,47 @@
       "declined": "Declined",
       "pending": "Awaiting reply",
       "seats": "Seats offered",
-      "attending": "Guests attending"
+      "attending": "Guests attending",
+      "remaining": "Hall seats left"
     },
     "search": "Search by name or phone…",
     "filter": {
       "all": "All",
       "confirmed": "Confirmed",
       "declined": "Declined",
-      "pending": "Pending"
+      "pending": "Pending",
+      "notSent": "Not sent",
+      "openedNoReply": "Opened, no reply"
+    },
+    "sort": {
+      "label": "Sort by",
+      "newestReply": "Newest reply",
+      "name": "Name",
+      "status": "Status",
+      "created": "Recently added"
+    },
+    "badges": {
+      "sent": "Sent",
+      "opened": "Opened",
+      "table": "Table {n}"
+    },
+    "details": {
+      "open": "Details",
+      "close": "Close details",
+      "notes": "Notes",
+      "notesPlaceholder": "e.g. Confirmed by phone with the family…",
+      "table": "Table number",
+      "markSent": "Mark as sent",
+      "unmarkSent": "Mark as not sent",
+      "sentOn": "Sent",
+      "openedOn": "Opened",
+      "reply": "Record their reply (phone RSVP)",
+      "replyYes": "Attending",
+      "replyNo": "Declined",
+      "replyNames": "Guest names, one per line",
+      "replyClear": "Clear reply",
+      "save": "Save",
+      "saved": "Saved"
     },
     "table": {
       "name": "Name",
@@ -111,6 +162,8 @@
       "copy": "Copy link",
       "copied": "Copied!",
       "whatsapp": "WhatsApp",
+      "reminder": "Remind",
+      "qr": "QR code",
       "edit": "Edit",
       "delete": "Delete",
       "save": "Save",
@@ -135,6 +188,7 @@
       "error": "Could not read that file. Please use the template."
     },
     "export": "Export Excel",
-    "whatsappMsg": "Dear {name}, you are warmly invited to the wedding of Aseel & Fadwa on Friday 16 Oct 2026, 7:30 PM at EVA Hall, Airport Road, Amman. Please confirm your attendance here: {link}"
+    "whatsappMsg": "Dear {name}, you are warmly invited to the wedding of Aseel & Fadwa on Friday 16 Oct 2026, 7:30 PM at EVA Hall, Airport Road, Amman. Please confirm your attendance here: {link}",
+    "reminderMsg": "Dear {name}, a gentle reminder to confirm your attendance at the wedding of Aseel & Fadwa (Friday 16 Oct 2026, 7:30 PM, EVA Hall) before 11 October: {link}"
   }
 }

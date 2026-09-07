@@ -6,10 +6,18 @@ import { useRouter } from "next/navigation";
 import { usePathname, useRouter as useIntlRouter } from "@/i18n/navigation";
 import type { InvitationDto } from "@/types";
 import { formatResponseTime } from "@/lib/dates";
+import { event } from "@/config/event";
 
-type Filter = "all" | "confirmed" | "declined" | "pending";
+type Filter =
+  | "all"
+  | "confirmed"
+  | "declined"
+  | "pending"
+  | "notSent"
+  | "openedNoReply";
+type Sort = "created" | "newestReply" | "name" | "status";
 
-function statusOf(inv: InvitationDto): Exclude<Filter, "all"> {
+function statusOf(inv: InvitationDto): "confirmed" | "declined" | "pending" {
   if (!inv.rsvp) return "pending";
   return inv.rsvp.attending ? "confirmed" : "declined";
 }
@@ -32,6 +40,7 @@ export function Dashboard({ initial }: { initial: InvitationDto[] }) {
   const [invitations, setInvitations] = useState<InvitationDto[]>(initial);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
+  const [sort, setSort] = useState<Sort>("created");
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // add form
@@ -44,11 +53,15 @@ export function Dashboard({ initial }: { initial: InvitationDto[] }) {
   const [uploadBusy, setUploadBusy] = useState(false);
   const [uploadMsg, setUploadMsg] = useState<string | null>(null);
 
-  // inline edit
-  const [editId, setEditId] = useState<string | null>(null);
-  const [editName, setEditName] = useState("");
-  const [editSeats, setEditSeats] = useState(1);
-  const [editPhone, setEditPhone] = useState("");
+  // expandable details panel
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [eName, setEName] = useState("");
+  const [eSeats, setESeats] = useState(1);
+  const [ePhone, setEPhone] = useState("");
+  const [eTable, setETable] = useState("");
+  const [eNotes, setENotes] = useState("");
+  const [eReplyNames, setEReplyNames] = useState("");
+  const [savedId, setSavedId] = useState<string | null>(null);
 
   async function refresh() {
     const res = await fetch("/api/admin/invitations");
@@ -60,14 +73,27 @@ export function Dashboard({ initial }: { initial: InvitationDto[] }) {
     setInvitations(data.invitations);
   }
 
+  async function patch(id: string, body: Record<string, unknown>) {
+    await fetch(`/api/admin/invitations/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    await refresh();
+  }
+
   const stats = useMemo(() => {
     let confirmed = 0;
     let declined = 0;
     let pending = 0;
     let seats = 0;
     let attending = 0;
+    let notSent = 0;
+    let openedNoReply = 0;
     for (const inv of invitations) {
       seats += inv.maxGuests;
+      if (!inv.sentAt) notSent++;
+      if (inv.viewedAt && !inv.rsvp) openedNoReply++;
       const s = statusOf(inv);
       if (s === "confirmed") {
         confirmed++;
@@ -75,22 +101,57 @@ export function Dashboard({ initial }: { initial: InvitationDto[] }) {
       } else if (s === "declined") declined++;
       else pending++;
     }
-    return { total: invitations.length, confirmed, declined, pending, seats, attending };
+    return {
+      total: invitations.length,
+      confirmed,
+      declined,
+      pending,
+      seats,
+      attending,
+      notSent,
+      openedNoReply,
+      remaining: event.hallCapacity - attending,
+    };
   }, [invitations]);
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return invitations.filter((inv) => {
-      if (filter !== "all" && statusOf(inv) !== filter) return false;
+    const filtered = invitations.filter((inv) => {
+      const s = statusOf(inv);
+      if (filter === "notSent" && inv.sentAt) return false;
+      if (filter === "openedNoReply" && !(inv.viewedAt && !inv.rsvp)) return false;
+      if (
+        (filter === "confirmed" || filter === "declined" || filter === "pending") &&
+        s !== filter
+      )
+        return false;
       if (!q) return true;
       return (
         inv.name.toLowerCase().includes(q) ||
         (inv.phone ?? "").includes(q) ||
         (inv.rsvp?.mobile ?? "").includes(q) ||
+        (inv.notes ?? "").toLowerCase().includes(q) ||
+        (inv.tableNo ?? "").toLowerCase().includes(q) ||
         inv.rsvp?.guestNames.some((n) => n.toLowerCase().includes(q))
       );
     });
-  }, [invitations, query, filter]);
+    const rank = { pending: 0, confirmed: 1, declined: 2 } as const;
+    return [...filtered].sort((a, b) => {
+      switch (sort) {
+        case "name":
+          return a.name.localeCompare(b.name, locale === "ar" ? "ar" : "en");
+        case "newestReply": {
+          const ta = a.rsvp ? Date.parse(a.rsvp.updatedAt) : 0;
+          const tb = b.rsvp ? Date.parse(b.rsvp.updatedAt) : 0;
+          return tb - ta;
+        }
+        case "status":
+          return rank[statusOf(a)] - rank[statusOf(b)];
+        default:
+          return Date.parse(b.createdAt) - Date.parse(a.createdAt);
+      }
+    });
+  }, [invitations, query, filter, sort, locale]);
 
   function linkFor(inv: InvitationDto): string {
     const origin =
@@ -98,6 +159,10 @@ export function Dashboard({ initial }: { initial: InvitationDto[] }) {
         ? window.location.origin
         : process.env.NEXT_PUBLIC_SITE_URL ?? "";
     return `${origin}/${locale}/rsvp/${inv.code}`;
+  }
+
+  function markSentSilently(inv: InvitationDto) {
+    if (!inv.sentAt) void patch(inv.id, { sent: true });
   }
 
   async function copyLink(inv: InvitationDto) {
@@ -108,10 +173,14 @@ export function Dashboard({ initial }: { initial: InvitationDto[] }) {
     } catch {
       window.prompt("", linkFor(inv));
     }
+    markSentSilently(inv);
   }
 
-  function whatsappHref(inv: InvitationDto): string {
-    const msg = t("whatsappMsg", { name: inv.name, link: linkFor(inv) });
+  function waHref(inv: InvitationDto, kind: "invite" | "reminder"): string {
+    const msg = t(kind === "invite" ? "whatsappMsg" : "reminderMsg", {
+      name: inv.name,
+      link: linkFor(inv),
+    });
     const phone = waPhone(inv.phone);
     return phone
       ? `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`
@@ -164,31 +233,42 @@ export function Dashboard({ initial }: { initial: InvitationDto[] }) {
     }
   }
 
-  function startEdit(inv: InvitationDto) {
-    setEditId(inv.id);
-    setEditName(inv.name);
-    setEditSeats(inv.maxGuests);
-    setEditPhone(inv.phone ?? "");
+  function openDetails(inv: InvitationDto) {
+    setOpenId(inv.id);
+    setEName(inv.name);
+    setESeats(inv.maxGuests);
+    setEPhone(inv.phone ?? "");
+    setETable(inv.tableNo ?? "");
+    setENotes(inv.notes ?? "");
+    setEReplyNames((inv.rsvp?.guestNames ?? []).join("\n"));
   }
 
-  async function saveEdit() {
-    if (!editId) return;
-    await fetch(`/api/admin/invitations/${editId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: editName,
-        maxGuests: editSeats,
-        phone: editPhone.trim() || null,
-      }),
+  async function saveDetails(id: string) {
+    await patch(id, {
+      name: eName,
+      maxGuests: eSeats,
+      phone: ePhone.trim() || null,
+      tableNo: eTable,
+      notes: eNotes,
     });
-    setEditId(null);
-    await refresh();
+    setSavedId(id);
+    setTimeout(() => setSavedId(null), 1600);
+  }
+
+  async function saveReply(id: string, attending: boolean) {
+    const names = eReplyNames
+      .split("\n")
+      .map((n) => n.trim())
+      .filter(Boolean);
+    await patch(id, { reply: { attending, guestNames: names } });
+    setSavedId(id);
+    setTimeout(() => setSavedId(null), 1600);
   }
 
   async function remove(inv: InvitationDto) {
     if (!window.confirm(t("actions.confirmDelete", { name: inv.name }))) return;
     await fetch(`/api/admin/invitations/${inv.id}`, { method: "DELETE" });
+    setOpenId(null);
     await refresh();
   }
 
@@ -203,7 +283,26 @@ export function Dashboard({ initial }: { initial: InvitationDto[] }) {
     pending: "border-ink-soft/50 text-ink-soft",
   } as const;
 
-  const filters: Filter[] = ["all", "confirmed", "declined", "pending"];
+  const filters: Filter[] = [
+    "all",
+    "confirmed",
+    "declined",
+    "pending",
+    "notSent",
+    "openedNoReply",
+  ];
+  const filterCount: Record<Exclude<Filter, "all">, number> = {
+    confirmed: stats.confirmed,
+    declined: stats.declined,
+    pending: stats.pending,
+    notSent: stats.notSent,
+    openedNoReply: stats.openedNoReply,
+  };
+
+  const exportHref = `/api/admin/export?status=${filter === "all" ? "" : filter}&q=${encodeURIComponent(query.trim())}`;
+
+  const btn =
+    "min-h-10 border border-olive-700/40 px-3 py-2 transition-colors hover:border-olive-700";
 
   return (
     <main className="grain min-h-svh bg-ivory-50 pb-24 text-ink">
@@ -217,21 +316,14 @@ export function Dashboard({ initial }: { initial: InvitationDto[] }) {
               onClick={() =>
                 intlRouter.replace(pathname, { locale: locale === "ar" ? "en" : "ar" })
               }
-              className="min-h-10 border border-olive-700/40 px-3 py-2 transition-colors hover:border-olive-700"
+              className={btn}
             >
               {locale === "ar" ? "English" : "العربية"}
             </button>
-            <a
-              href="/api/admin/export"
-              className="min-h-10 border border-olive-700/40 px-3 py-2 transition-colors hover:border-olive-700"
-            >
+            <a href={exportHref} className={btn}>
               {t("export")}
             </a>
-            <button
-              type="button"
-              onClick={logout}
-              className="min-h-10 border border-olive-700/40 px-3 py-2 text-ink-soft transition-colors hover:border-olive-700"
-            >
+            <button type="button" onClick={logout} className={`${btn} text-ink-soft`}>
               {t("logout")}
             </button>
           </div>
@@ -240,19 +332,26 @@ export function Dashboard({ initial }: { initial: InvitationDto[] }) {
 
       <div className="mx-auto flex max-w-4xl flex-col gap-10 px-4 pt-8 sm:px-8">
         {/* stats */}
-        <section className="grid grid-cols-3 gap-y-6 sm:grid-cols-6">
+        <section className="grid grid-cols-3 gap-y-6 sm:grid-cols-7">
           {(
             [
-              ["families", stats.total],
-              ["confirmed", stats.confirmed],
-              ["declined", stats.declined],
-              ["pending", stats.pending],
-              ["seats", stats.seats],
-              ["attending", stats.attending],
+              ["families", stats.total, ""],
+              ["confirmed", stats.confirmed, ""],
+              ["declined", stats.declined, ""],
+              ["pending", stats.pending, ""],
+              ["seats", stats.seats, ""],
+              ["attending", stats.attending, ""],
+              [
+                "remaining",
+                stats.remaining,
+                stats.remaining < 0 ? "text-clay" : "",
+              ],
             ] as const
-          ).map(([key, value]) => (
+          ).map(([key, value, extra]) => (
             <div key={key} className="flex flex-col items-center gap-1 text-center">
-              <span className="type-display text-3xl tabular-nums">{value}</span>
+              <span className={`type-display text-3xl tabular-nums ${extra}`}>
+                {value}
+              </span>
               <span className="text-[11px] text-ink-soft">{t(`stats.${key}`)}</span>
             </div>
           ))}
@@ -332,7 +431,7 @@ export function Dashboard({ initial }: { initial: InvitationDto[] }) {
           </div>
         </section>
 
-        {/* search + filter */}
+        {/* search + filter + sort */}
         <section className="flex flex-col gap-4">
           <input
             type="search"
@@ -342,13 +441,13 @@ export function Dashboard({ initial }: { initial: InvitationDto[] }) {
             aria-label={t("search")}
             className="input-line"
           />
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {filters.map((f) => (
               <button
                 key={f}
                 type="button"
                 onClick={() => setFilter(f)}
-                className={`min-h-10 border px-4 py-2 text-xs transition-colors ${
+                className={`min-h-10 border px-3.5 py-2 text-xs transition-colors ${
                   filter === f
                     ? "border-olive-700 bg-olive-700 text-cream"
                     : "border-olive-700/40 text-ink-soft hover:border-olive-700"
@@ -356,16 +455,23 @@ export function Dashboard({ initial }: { initial: InvitationDto[] }) {
               >
                 {t(`filter.${f}`)}
                 {f !== "all" && (
-                  <span className="ms-1.5 tabular-nums">
-                    {f === "confirmed"
-                      ? stats.confirmed
-                      : f === "declined"
-                        ? stats.declined
-                        : stats.pending}
-                  </span>
+                  <span className="ms-1.5 tabular-nums">{filterCount[f]}</span>
                 )}
               </button>
             ))}
+            <label className="ms-auto flex items-center gap-2 text-[11px] text-ink-soft">
+              {t("sort.label")}
+              <select
+                value={sort}
+                onChange={(e) => setSort(e.target.value as Sort)}
+                className="min-h-10 border border-olive-700/40 bg-transparent px-2 py-2 text-xs text-ink"
+              >
+                <option value="created">{t("sort.created")}</option>
+                <option value="newestReply">{t("sort.newestReply")}</option>
+                <option value="name">{t("sort.name")}</option>
+                <option value="status">{t("sort.status")}</option>
+              </select>
+            </label>
           </div>
         </section>
 
@@ -383,117 +489,164 @@ export function Dashboard({ initial }: { initial: InvitationDto[] }) {
             <ul className="divide-y divide-brass/25 border-y border-brass/25">
               {visible.map((inv) => {
                 const s = statusOf(inv);
-                const editing = editId === inv.id;
+                const open = openId === inv.id;
                 return (
                   <li key={inv.id} className="flex flex-col gap-3 py-4">
-                    {editing ? (
-                      <div className="flex flex-col gap-3">
-                        <input
-                          value={editName}
-                          onChange={(e) => setEditName(e.target.value)}
-                          aria-label={t("table.name")}
-                          className="input-line"
-                        />
-                        <div className="flex gap-4">
-                          <label className="flex flex-1 flex-col gap-1 text-[11px] text-ink-soft">
-                            {t("add.seats")}
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex items-center gap-3">
+                        <span className="text-base font-medium">{inv.name}</span>
+                        <span className="text-xs text-ink-soft">
+                          {inv.maxGuests} · {t("table.seats")}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {inv.tableNo && (
+                          <span className="border border-brass/50 px-2 py-1 text-[11px] text-ink-soft">
+                            {t("badges.table", { n: inv.tableNo })}
+                          </span>
+                        )}
+                        {inv.sentAt && (
+                          <span className="border border-olive-700/30 px-2 py-1 text-[11px] text-ink-soft">
+                            {t("badges.sent")}
+                          </span>
+                        )}
+                        {inv.viewedAt && (
+                          <span className="border border-olive-700/30 px-2 py-1 text-[11px] text-ink-soft">
+                            {t("badges.opened")}
+                          </span>
+                        )}
+                        <span className={`border px-2.5 py-1 text-[11px] ${chip[s]}`}>
+                          {t(`status.${s}`)}
+                          {s === "confirmed" && inv.rsvp
+                            ? ` · ${inv.rsvp.guestNames.length}`
+                            : ""}
+                        </span>
+                      </div>
+                    </div>
+
+                    {(inv.rsvp || inv.phone || inv.notes) && (
+                      <div className="flex flex-col gap-1 text-xs text-ink-soft">
+                        {inv.rsvp && inv.rsvp.guestNames.length > 0 && (
+                          <span>{inv.rsvp.guestNames.join("، ")}</span>
+                        )}
+                        {inv.notes && <span className="italic">{inv.notes}</span>}
+                        <span className="flex flex-wrap gap-x-4">
+                          {(inv.rsvp?.mobile || inv.phone) && (
+                            <span dir="ltr">{inv.rsvp?.mobile ?? inv.phone}</span>
+                          )}
+                          {inv.rsvp && (
+                            <span>
+                              {t("table.respondedAt")}:{" "}
+                              {formatResponseTime(locale, new Date(inv.rsvp.updatedAt))}
+                            </span>
+                          )}
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      <button type="button" onClick={() => copyLink(inv)} className={btn}>
+                        {copiedId === inv.id ? t("actions.copied") : t("actions.copy")}
+                      </button>
+                      <a
+                        href={waHref(inv, "invite")}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => markSentSilently(inv)}
+                        className={btn}
+                      >
+                        {t("actions.whatsapp")}
+                      </a>
+                      {s === "pending" && inv.sentAt && (
+                        <a
+                          href={waHref(inv, "reminder")}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={btn}
+                        >
+                          {t("actions.reminder")}
+                        </a>
+                      )}
+                      <a href={`/api/admin/qr/${inv.id}`} className={btn}>
+                        {t("actions.qr")}
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => (open ? setOpenId(null) : openDetails(inv))}
+                        className={`${btn} ${open ? "border-olive-700 bg-olive-700 text-cream" : "text-ink-soft"}`}
+                      >
+                        {open ? t("details.close") : t("details.open")}
+                      </button>
+                    </div>
+
+                    {open && (
+                      <div className="mt-2 flex flex-col gap-5 border border-brass/30 p-4">
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          <label className="flex flex-col gap-1 text-[11px] text-ink-soft">
+                            {t("table.name")}
                             <input
-                              type="number"
-                              min={1}
-                              max={50}
-                              value={editSeats}
-                              onChange={(e) => setEditSeats(Number(e.target.value) || 1)}
+                              value={eName}
+                              onChange={(e) => setEName(e.target.value)}
                               className="input-line"
                             />
                           </label>
-                          <label className="flex flex-[2] flex-col gap-1 text-[11px] text-ink-soft">
+                          <div className="flex gap-4">
+                            <label className="flex flex-1 flex-col gap-1 text-[11px] text-ink-soft">
+                              {t("add.seats")}
+                              <input
+                                type="number"
+                                min={1}
+                                max={50}
+                                value={eSeats}
+                                onChange={(e) => setESeats(Number(e.target.value) || 1)}
+                                className="input-line"
+                              />
+                            </label>
+                            <label className="flex flex-1 flex-col gap-1 text-[11px] text-ink-soft">
+                              {t("details.table")}
+                              <input
+                                value={eTable}
+                                onChange={(e) => setETable(e.target.value)}
+                                className="input-line"
+                              />
+                            </label>
+                          </div>
+                          <label className="flex flex-col gap-1 text-[11px] text-ink-soft">
                             {t("add.phone")}
                             <input
                               type="tel"
                               dir="ltr"
-                              value={editPhone}
-                              onChange={(e) => setEditPhone(e.target.value)}
+                              value={ePhone}
+                              onChange={(e) => setEPhone(e.target.value)}
                               className="input-line rtl:text-right"
                             />
                           </label>
-                        </div>
-                        <div className="flex gap-2">
-                          <button
-                            type="button"
-                            onClick={saveEdit}
-                            className="min-h-10 bg-olive-700 px-4 py-2 text-xs text-cream"
-                          >
-                            {t("actions.save")}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setEditId(null)}
-                            className="min-h-10 border border-olive-700/40 px-4 py-2 text-xs text-ink-soft"
-                          >
-                            {t("actions.cancel")}
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="flex flex-wrap items-center justify-between gap-2">
-                          <div className="flex items-center gap-3">
-                            <span className="text-base font-medium">{inv.name}</span>
-                            <span className="text-xs text-ink-soft">
-                              {inv.maxGuests} · {t("table.seats")}
-                            </span>
-                          </div>
-                          <span
-                            className={`border px-2.5 py-1 text-[11px] ${chip[s]}`}
-                          >
-                            {t(`status.${s}`)}
-                            {s === "confirmed" && inv.rsvp
-                              ? ` · ${inv.rsvp.guestNames.length}`
-                              : ""}
-                          </span>
+                          <label className="flex flex-col gap-1 text-[11px] text-ink-soft">
+                            {t("details.notes")}
+                            <textarea
+                              value={eNotes}
+                              onChange={(e) => setENotes(e.target.value)}
+                              placeholder={t("details.notesPlaceholder")}
+                              rows={2}
+                              className="input-line resize-y"
+                            />
+                          </label>
                         </div>
 
-                        {(inv.rsvp || inv.phone) && (
-                          <div className="flex flex-col gap-1 text-xs text-ink-soft">
-                            {inv.rsvp && inv.rsvp.guestNames.length > 0 && (
-                              <span>{inv.rsvp.guestNames.join("، ")}</span>
-                            )}
-                            <span className="flex flex-wrap gap-x-4">
-                              {(inv.rsvp?.mobile || inv.phone) && (
-                                <span dir="ltr">{inv.rsvp?.mobile ?? inv.phone}</span>
-                              )}
-                              {inv.rsvp && (
-                                <span>
-                                  {t("table.respondedAt")}:{" "}
-                                  {formatResponseTime(locale, new Date(inv.rsvp.updatedAt))}
-                                </span>
-                              )}
-                            </span>
-                          </div>
-                        )}
-
-                        <div className="flex flex-wrap gap-2 text-xs">
+                        <div className="flex flex-wrap items-center gap-2 text-xs">
                           <button
                             type="button"
-                            onClick={() => copyLink(inv)}
-                            className="min-h-10 border border-olive-700/40 px-3 py-2 transition-colors hover:border-olive-700"
+                            onClick={() => saveDetails(inv.id)}
+                            className="min-h-10 bg-olive-700 px-4 py-2 text-cream"
                           >
-                            {copiedId === inv.id ? t("actions.copied") : t("actions.copy")}
+                            {savedId === inv.id ? t("details.saved") : t("details.save")}
                           </button>
-                          <a
-                            href={whatsappHref(inv)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="min-h-10 border border-olive-700/40 px-3 py-2 transition-colors hover:border-olive-700"
-                          >
-                            {t("actions.whatsapp")}
-                          </a>
                           <button
                             type="button"
-                            onClick={() => startEdit(inv)}
-                            className="min-h-10 border border-olive-700/40 px-3 py-2 text-ink-soft transition-colors hover:border-olive-700"
+                            onClick={() => patch(inv.id, { sent: !inv.sentAt })}
+                            className={btn}
                           >
-                            {t("actions.edit")}
+                            {inv.sentAt ? t("details.unmarkSent") : t("details.markSent")}
                           </button>
                           <button
                             type="button"
@@ -503,7 +656,47 @@ export function Dashboard({ initial }: { initial: InvitationDto[] }) {
                             {t("actions.delete")}
                           </button>
                         </div>
-                      </>
+
+                        <div className="flex flex-col gap-3 border-t border-brass/25 pt-4">
+                          <p className="tracked text-[11px] text-ink-soft">
+                            {t("details.reply")}
+                          </p>
+                          <label className="flex flex-col gap-1 text-[11px] text-ink-soft">
+                            {t("details.replyNames")}
+                            <textarea
+                              value={eReplyNames}
+                              onChange={(e) => setEReplyNames(e.target.value)}
+                              rows={3}
+                              className="input-line resize-y"
+                            />
+                          </label>
+                          <div className="flex flex-wrap gap-2 text-xs">
+                            <button
+                              type="button"
+                              onClick={() => saveReply(inv.id, true)}
+                              className={btn}
+                            >
+                              ✓ {t("details.replyYes")}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => saveReply(inv.id, false)}
+                              className={btn}
+                            >
+                              ✕ {t("details.replyNo")}
+                            </button>
+                            {inv.rsvp && (
+                              <button
+                                type="button"
+                                onClick={() => patch(inv.id, { reply: null })}
+                                className={`${btn} text-ink-soft`}
+                              >
+                                {t("details.replyClear")}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
                     )}
                   </li>
                 );

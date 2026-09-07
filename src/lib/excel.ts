@@ -100,6 +100,10 @@ export type ExportRow = {
   guestNames: string;
   mobile: string | null;
   respondedAt: string;
+  sent: string;
+  opened: string;
+  tableNo: string;
+  notes: string;
   link: string;
 };
 
@@ -115,6 +119,10 @@ export function buildExport(rows: ExportRow[]): Buffer {
       "Guest names / أسماء الضيوف",
       "RSVP mobile / هاتف الرد",
       "Replied at / تاريخ الرد",
+      "Sent / أُرسلت",
+      "Opened / فُتحت",
+      "Table / الطاولة",
+      "Notes / ملاحظات",
       "Link / الرابط",
     ],
     ...rows.map((r) => [
@@ -126,6 +134,10 @@ export function buildExport(rows: ExportRow[]): Buffer {
       r.guestNames,
       r.mobile ?? "",
       r.respondedAt,
+      r.sent,
+      r.opened,
+      r.tableNo,
+      r.notes,
       r.link,
     ]),
   ]);
@@ -138,6 +150,10 @@ export function buildExport(rows: ExportRow[]): Buffer {
     { wch: 40 },
     { wch: 16 },
     { wch: 18 },
+    { wch: 12 },
+    { wch: 12 },
+    { wch: 10 },
+    { wch: 30 },
     { wch: 46 },
   ];
   XLSX.utils.book_append_sheet(wb, ws, "RSVPs");

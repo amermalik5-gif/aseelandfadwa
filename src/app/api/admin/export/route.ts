@@ -4,6 +4,8 @@ import { requireAdmin } from "@/lib/adminGuard";
 import { buildExport } from "@/lib/excel";
 import { formatResponseTime } from "@/lib/dates";
 
+type Status = "confirmed" | "declined" | "pending" | "notSent" | "openedNoReply";
+
 export async function GET(req: NextRequest) {
   const denied = await requireAdmin();
   if (denied) return denied;
@@ -12,13 +14,34 @@ export async function GET(req: NextRequest) {
     process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
     req.nextUrl.origin;
 
+  const status = req.nextUrl.searchParams.get("status") as Status | null;
+  const q = (req.nextUrl.searchParams.get("q") ?? "").trim().toLowerCase();
+
   const invitations = await prisma.invitation.findMany({
     include: { rsvp: true },
     orderBy: { createdAt: "asc" },
   });
 
+  const filtered = invitations.filter((inv) => {
+    if (status === "confirmed" && !(inv.rsvp && inv.rsvp.attending)) return false;
+    if (status === "declined" && !(inv.rsvp && !inv.rsvp.attending)) return false;
+    if (status === "pending" && inv.rsvp) return false;
+    if (status === "notSent" && inv.sentAt) return false;
+    if (status === "openedNoReply" && !(inv.viewedAt && !inv.rsvp)) return false;
+    if (!q) return true;
+    const names = (inv.rsvp?.guestNames as string[] | undefined) ?? [];
+    return (
+      inv.name.toLowerCase().includes(q) ||
+      (inv.phone ?? "").includes(q) ||
+      (inv.rsvp?.mobile ?? "").includes(q) ||
+      (inv.notes ?? "").toLowerCase().includes(q) ||
+      (inv.tableNo ?? "").toLowerCase().includes(q) ||
+      names.some((n) => n.toLowerCase().includes(q))
+    );
+  });
+
   const buffer = buildExport(
-    invitations.map((inv) => {
+    filtered.map((inv) => {
       const names = (inv.rsvp?.guestNames as string[] | undefined) ?? [];
       return {
         name: inv.name,
@@ -35,6 +58,10 @@ export async function GET(req: NextRequest) {
         respondedAt: inv.rsvp
           ? formatResponseTime("en", inv.rsvp.updatedAt)
           : "",
+        sent: inv.sentAt ? "Yes / نعم" : "",
+        opened: inv.viewedAt ? "Yes / نعم" : "",
+        tableNo: inv.tableNo ?? "",
+        notes: inv.notes ?? "",
         link: `${base}/ar/rsvp/${inv.code}`,
       };
     })

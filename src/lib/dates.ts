@@ -45,6 +45,17 @@ export function formatDeadline(locale: string): string {
   }).format(rsvpDeadline);
 }
 
+/** "5:00 pm" / "٥:٠٠ م" for an agenda stop time like "17:00" (Amman time) */
+export function formatAgendaTime(locale: string, time: string): string {
+  const d = new Date(`${event.dateISO.slice(0, 10)}T${time}:00+03:00`);
+  return new Intl.DateTimeFormat(intlLocale(locale), {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+    timeZone: TZ,
+  }).format(d);
+}
+
 /** Short date-time for the dashboard, always Amman time */
 export function formatResponseTime(locale: string, date: Date): string {
   return new Intl.DateTimeFormat(locale === "ar" ? "ar-JO" : "en-GB", {

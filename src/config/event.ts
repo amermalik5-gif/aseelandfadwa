@@ -20,6 +20,35 @@ export const event = {
   venueAreaEn: "Airport Road, Amman",
   venueAreaAr: "طريق المطار، عمّان",
   mapsUrl: "https://maps.app.goo.gl/XVhXm2447mQXHVf1A",
+
+  // Wedding-day agenda: shown as a timeline on the invitation.
+  // areaAr/areaEn are optional neighborhood lines (leave "" to hide).
+  agenda: [
+    {
+      key: "groom",
+      time: "17:00",
+      mapsUrl: "https://maps.app.goo.gl/Z5GEoM2bdo2ViafY8",
+      areaAr: "",
+      areaEn: "",
+    },
+    {
+      key: "bride",
+      time: "18:30",
+      mapsUrl: "https://maps.app.goo.gl/TAFDmsjvL48i7vNH9",
+      areaAr: "",
+      areaEn: "",
+    },
+    {
+      key: "venue",
+      time: "19:30",
+      mapsUrl: "https://maps.app.goo.gl/XVhXm2447mQXHVf1A",
+      areaAr: "طريق المطار، عمّان",
+      areaEn: "Airport Road, Amman",
+    },
+  ],
+
+  // Seats available in the hall; the dashboard shows remaining capacity.
+  hallCapacity: 400,
 } as const;
 
 export const eventDate = new Date(event.dateISO);

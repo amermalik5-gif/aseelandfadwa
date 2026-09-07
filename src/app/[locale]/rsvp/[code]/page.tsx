@@ -17,6 +17,18 @@ export default async function RsvpByCode({
     include: { rsvp: true },
   });
 
+  if (invitation && !invitation.viewedAt) {
+    // record the first time this invitation was opened
+    try {
+      await prisma.invitation.update({
+        where: { id: invitation.id },
+        data: { viewedAt: new Date() },
+      });
+    } catch {
+      // non-critical; the page must render regardless
+    }
+  }
+
   if (!invitation) {
     const t = await getTranslations({ locale, namespace: "invalid" });
     return (
