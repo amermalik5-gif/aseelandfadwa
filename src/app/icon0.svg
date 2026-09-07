@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 760">
+  <g fill="none" stroke="#C79E52" stroke-linecap="round">
+    <!-- interlocked rings -->
+    <circle cx="392" cy="518" r="212" stroke-width="26"/>
+    <circle cx="694" cy="514" r="214" stroke-width="26"/>
+    <!-- diamond -->
+    <path d="M492 190 L592 190 L622 240 L541 304 L461 240 Z" stroke-width="22" stroke-linejoin="round"/>
+    <!-- sparkle rays -->
+    <path d="M541 40 L541 108" stroke-width="24"/>
+    <path d="M434 90 L468 132" stroke-width="24"/>
+    <path d="M648 90 L614 132" stroke-width="24"/>
+    <path d="M332 210 L420 221" stroke-width="24"/>
+    <path d="M750 210 L662 221" stroke-width="24"/>
+  </g>
+</svg>
