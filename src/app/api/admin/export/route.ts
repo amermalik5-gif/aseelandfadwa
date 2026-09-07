@@ -29,20 +29,17 @@ export async function GET(req: NextRequest) {
     if (status === "notSent" && inv.sentAt) return false;
     if (status === "openedNoReply" && !(inv.viewedAt && !inv.rsvp)) return false;
     if (!q) return true;
-    const names = (inv.rsvp?.guestNames as string[] | undefined) ?? [];
     return (
       inv.name.toLowerCase().includes(q) ||
       (inv.phone ?? "").includes(q) ||
       (inv.rsvp?.mobile ?? "").includes(q) ||
       (inv.notes ?? "").toLowerCase().includes(q) ||
-      (inv.tableNo ?? "").toLowerCase().includes(q) ||
-      names.some((n) => n.toLowerCase().includes(q))
+      (inv.tableNo ?? "").toLowerCase().includes(q)
     );
   });
 
   const buffer = buildExport(
     filtered.map((inv) => {
-      const names = (inv.rsvp?.guestNames as string[] | undefined) ?? [];
       return {
         name: inv.name,
         maxGuests: inv.maxGuests,
@@ -52,8 +49,7 @@ export async function GET(req: NextRequest) {
           : inv.rsvp.attending
             ? "Confirmed / مؤكد"
             : "Declined / معتذر",
-        attendingCount: inv.rsvp?.attending ? names.length : inv.rsvp ? 0 : null,
-        guestNames: names.join("، "),
+        attendingCount: inv.rsvp?.attending ? inv.maxGuests : inv.rsvp ? 0 : null,
         mobile: inv.rsvp?.mobile ?? null,
         respondedAt: inv.rsvp
           ? formatResponseTime("en", inv.rsvp.updatedAt)

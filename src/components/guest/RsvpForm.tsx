@@ -5,18 +5,15 @@ import { useLocale, useTranslations } from "next-intl";
 
 type Existing = {
   attending: boolean;
-  guestNames: string[];
   mobile: string | null;
 } | null;
 
 export function RsvpForm({
   code,
-  maxGuests,
   existing,
   closed,
 }: {
   code: string;
-  maxGuests: number;
   existing: Existing;
   closed: boolean;
 }) {
@@ -29,18 +26,11 @@ export function RsvpForm({
   const [attending, setAttending] = useState<boolean | null>(
     existing ? existing.attending : null
   );
-  const [names, setNames] = useState<string[]>(
-    existing?.guestNames.length ? existing.guestNames : [""]
-  );
   const [mobile, setMobile] = useState(existing?.mobile ?? "");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   const showSummary = saved !== null && !editing;
-
-  function setName(i: number, value: string) {
-    setNames((prev) => prev.map((n, idx) => (idx === i ? value : n)));
-  }
 
   function validMobile(value: string) {
     if (!value.trim()) return true;
@@ -53,11 +43,6 @@ export function RsvpForm({
 
     if (attending === null) {
       setError(t("chooseAnswer"));
-      return;
-    }
-    const cleaned = names.map((n) => n.trim()).filter(Boolean);
-    if (attending && (cleaned.length === 0 || cleaned.length < names.length)) {
-      setError(t("nameRequired"));
       return;
     }
     if (!validMobile(mobile)) {
@@ -73,17 +58,12 @@ export function RsvpForm({
         body: JSON.stringify({
           code,
           attending,
-          guestNames: attending ? cleaned : [],
           mobile: mobile.trim() || null,
           locale,
         }),
       });
       if (!res.ok) throw new Error(await res.text());
-      setSaved({
-        attending,
-        guestNames: attending ? cleaned : [],
-        mobile: mobile.trim() || null,
-      });
+      setSaved({ attending, mobile: mobile.trim() || null });
       setEditing(false);
     } catch {
       setError(t("error"));
@@ -106,20 +86,12 @@ export function RsvpForm({
         <p className="text-lg leading-relaxed text-ink">
           {saved.attending ? t("thanksYes") : t("thanksNo")}
         </p>
-        {saved.attending && saved.guestNames.length > 0 && (
-          <ul className="text-base text-ink-soft">
-            {saved.guestNames.map((n, i) => (
-              <li key={i}>{n}</li>
-            ))}
-          </ul>
-        )}
         {!closed && (
           <button
             type="button"
             onClick={() => {
               setEditing(true);
               setAttending(saved.attending);
-              setNames(saved.guestNames.length ? saved.guestNames : [""]);
               setMobile(saved.mobile ?? "");
             }}
             className="tracked border-b border-brass pb-0.5 text-xs text-ink-soft transition-colors hover:text-ink"
@@ -163,60 +135,24 @@ export function RsvpForm({
         </button>
       </div>
 
-      {attending !== false && (
-        <>
-          <div className="flex flex-col gap-1.5">
-            <span className="tracked text-[11px] text-ink-soft">
-              {t("namesLabel")}
-            </span>
-            <span className="text-xs text-ink-soft/80">
-              {t("allowance", { count: maxGuests })} · {t("namesHint")}
-            </span>
-            <div className="mt-2 flex flex-col gap-3">
-              {names.map((n, i) => (
-                <input
-                  key={i}
-                  type="text"
-                  value={n}
-                  onChange={(e) => setName(i, e.target.value)}
-                  placeholder={t("guestField", { n: i + 1 })}
-                  aria-label={t("guestField", { n: i + 1 })}
-                  className="input-line"
-                  autoComplete={i === 0 ? "name" : "off"}
-                />
-              ))}
-            </div>
-            {names.length < maxGuests && (
-              <button
-                type="button"
-                onClick={() => setNames((p) => [...p, ""])}
-                className="tracked mt-3 self-start border-b border-brass pb-0.5 text-[11px] text-ink-soft transition-colors hover:text-ink"
-              >
-                + {t("addGuest")}
-              </button>
-            )}
-          </div>
-
-          <label className="flex flex-col gap-1.5">
-            <span className="tracked text-[11px] text-ink-soft">
-              {t("mobile")}{" "}
-              <span className="normal-case tracking-normal opacity-70">
-                ({t("optional")})
-              </span>
-            </span>
-            <input
-              type="tel"
-              inputMode="tel"
-              dir="ltr"
-              value={mobile}
-              onChange={(e) => setMobile(e.target.value)}
-              placeholder="07XXXXXXXX"
-              className="input-line rtl:text-right"
-              autoComplete="tel"
-            />
-          </label>
-        </>
-      )}
+      <label className="flex flex-col gap-1.5">
+        <span className="tracked text-[11px] text-ink-soft">
+          {t("mobile")}{" "}
+          <span className="normal-case tracking-normal opacity-70">
+            ({t("optional")})
+          </span>
+        </span>
+        <input
+          type="tel"
+          inputMode="tel"
+          dir="ltr"
+          value={mobile}
+          onChange={(e) => setMobile(e.target.value)}
+          placeholder="07XXXXXXXX"
+          className="input-line rtl:text-right"
+          autoComplete="tel"
+        />
+      </label>
 
       {error && (
         <p role="alert" className="text-center text-sm text-clay">

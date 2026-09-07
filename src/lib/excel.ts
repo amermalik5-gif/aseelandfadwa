@@ -97,7 +97,6 @@ export type ExportRow = {
   phone: string | null;
   status: string;
   attendingCount: number | null;
-  guestNames: string;
   mobile: string | null;
   respondedAt: string;
   sent: string;
@@ -116,7 +115,6 @@ export function buildExport(rows: ExportRow[]): Buffer {
       "Phone / الهاتف",
       "Status / الحالة",
       "Coming / عدد الحضور",
-      "Guest names / أسماء الضيوف",
       "RSVP mobile / هاتف الرد",
       "Replied at / تاريخ الرد",
       "Sent / أُرسلت",
@@ -131,7 +129,6 @@ export function buildExport(rows: ExportRow[]): Buffer {
       r.phone ?? "",
       r.status,
       r.attendingCount ?? "",
-      r.guestNames,
       r.mobile ?? "",
       r.respondedAt,
       r.sent,
@@ -147,7 +144,6 @@ export function buildExport(rows: ExportRow[]): Buffer {
     { wch: 16 },
     { wch: 12 },
     { wch: 10 },
-    { wch: 40 },
     { wch: 16 },
     { wch: 18 },
     { wch: 12 },

@@ -50,7 +50,6 @@ export default async function RsvpByCode({
   const existingRsvp = invitation.rsvp
     ? {
         attending: invitation.rsvp.attending,
-        guestNames: (invitation.rsvp.guestNames as string[]) ?? [],
         mobile: invitation.rsvp.mobile,
       }
     : null;

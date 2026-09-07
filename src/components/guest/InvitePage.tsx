@@ -22,7 +22,6 @@ type Invitation = {
 
 type ExistingRsvp = {
   attending: boolean;
-  guestNames: string[];
   mobile: string | null;
 } | null;
 
@@ -235,6 +234,9 @@ export async function InvitePage({
                 <p className="type-display mt-1 text-3xl text-ink sm:text-4xl">
                   {invitation.name}
                 </p>
+                <p className="mt-3 text-sm text-ink-soft">
+                  {t("rsvp.allowance", { count: invitation.maxGuests })}
+                </p>
               </div>
               <p className="text-center text-sm text-ink-soft">
                 {t("rsvp.deadline", { date: formatDeadline(locale) })}
@@ -242,7 +244,6 @@ export async function InvitePage({
               <RuleDiamond className="w-40" />
               <RsvpForm
                 code={invitation.code}
-                maxGuests={invitation.maxGuests}
                 existing={existingRsvp}
                 closed={rsvpClosed()}
               />

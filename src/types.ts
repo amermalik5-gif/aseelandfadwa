@@ -1,6 +1,5 @@
 export type RsvpDto = {
   attending: boolean;
-  guestNames: string[];
   mobile: string | null;
   updatedAt: string;
 };

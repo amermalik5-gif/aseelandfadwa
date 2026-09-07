@@ -73,7 +73,6 @@ export function Dashboard({
   const [ePhone, setEPhone] = useState("");
   const [eTable, setETable] = useState("");
   const [eNotes, setENotes] = useState("");
-  const [eReplyNames, setEReplyNames] = useState("");
   const [savedId, setSavedId] = useState<string | null>(null);
 
   async function refresh() {
@@ -110,7 +109,7 @@ export function Dashboard({
       const s = statusOf(inv);
       if (s === "confirmed") {
         confirmed++;
-        attending += inv.rsvp!.guestNames.length;
+        attending += inv.maxGuests;
       } else if (s === "declined") declined++;
       else pending++;
     }
@@ -144,8 +143,7 @@ export function Dashboard({
         (inv.phone ?? "").includes(q) ||
         (inv.rsvp?.mobile ?? "").includes(q) ||
         (inv.notes ?? "").toLowerCase().includes(q) ||
-        (inv.tableNo ?? "").toLowerCase().includes(q) ||
-        inv.rsvp?.guestNames.some((n) => n.toLowerCase().includes(q))
+        (inv.tableNo ?? "").toLowerCase().includes(q)
       );
     });
     const rank = { pending: 0, confirmed: 1, declined: 2 } as const;
@@ -279,7 +277,6 @@ export function Dashboard({
     setEPhone(inv.phone ?? "");
     setETable(inv.tableNo ?? "");
     setENotes(inv.notes ?? "");
-    setEReplyNames((inv.rsvp?.guestNames ?? []).join("\n"));
   }
 
   async function saveDetails(id: string) {
@@ -295,11 +292,7 @@ export function Dashboard({
   }
 
   async function saveReply(id: string, attending: boolean) {
-    const names = eReplyNames
-      .split("\n")
-      .map((n) => n.trim())
-      .filter(Boolean);
-    await patch(id, { reply: { attending, guestNames: names } });
+    await patch(id, { reply: { attending } });
     setSavedId(id);
     setTimeout(() => setSavedId(null), 1600);
   }
@@ -665,18 +658,13 @@ export function Dashboard({
                         )}
                         <span className={`border px-2.5 py-1 text-[11px] ${chip[s]}`}>
                           {t(`status.${s}`)}
-                          {s === "confirmed" && inv.rsvp
-                            ? ` · ${inv.rsvp.guestNames.length}`
-                            : ""}
+                          {s === "confirmed" ? ` · ${inv.maxGuests}` : ""}
                         </span>
                       </div>
                     </div>
 
                     {(inv.rsvp || inv.phone || inv.notes) && (
                       <div className="flex flex-col gap-1 text-xs text-ink-soft">
-                        {inv.rsvp && inv.rsvp.guestNames.length > 0 && (
-                          <span>{inv.rsvp.guestNames.join("، ")}</span>
-                        )}
                         {inv.notes && <span className="italic">{inv.notes}</span>}
                         <span className="flex flex-wrap gap-x-4">
                           {(inv.rsvp?.mobile || inv.phone) && (
@@ -819,15 +807,6 @@ export function Dashboard({
                           <p className="tracked text-[11px] text-ink-soft">
                             {t("details.reply")}
                           </p>
-                          <label className="flex flex-col gap-1 text-[11px] text-ink-soft">
-                            {t("details.replyNames")}
-                            <textarea
-                              value={eReplyNames}
-                              onChange={(e) => setEReplyNames(e.target.value)}
-                              rows={3}
-                              className="input-line resize-y"
-                            />
-                          </label>
                           <div className="flex flex-wrap gap-2 text-xs">
                             <button
                               type="button"

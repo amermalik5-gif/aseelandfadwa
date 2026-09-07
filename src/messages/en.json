@@ -48,13 +48,7 @@
     "mobile": "Mobile number",
     "optional": "optional",
     "mobileInvalid": "Please enter a valid mobile number",
-    "guestsLabel": "Number of guests, including you",
     "allowance": "This invitation admits {count, plural, one {one guest} two {two guests} other {up to # guests}}",
-    "namesLabel": "Guest names",
-    "namesHint": "One full name per seat",
-    "guestField": "Guest {n} full name",
-    "nameRequired": "Please enter every guest's name",
-    "addGuest": "Add another guest",
     "yes": "Yes, we will be there",
     "no": "Sorry, we are unable to attend",
     "chooseAnswer": "Please choose an answer",
@@ -65,8 +59,7 @@
     "edit": "Edit my response",
     "closed": "The RSVP period has ended. If your plans changed, please reach out to the families directly.",
     "error": "Something went wrong. Please try again.",
-    "noCode": "To confirm your attendance, please open the personal invitation link you received.",
-    "respondedOn": "Response received"
+    "noCode": "To confirm your attendance, please open the personal invitation link you received."
   },
   "invalid": {
     "title": "Invitation not found",
@@ -144,7 +137,6 @@
       "reply": "Record their reply (phone RSVP)",
       "replyYes": "Attending",
       "replyNo": "Declined",
-      "replyNames": "Guest names, one per line",
       "replyClear": "Clear reply",
       "save": "Save",
       "saved": "Saved"
@@ -154,7 +146,6 @@
       "seats": "Seats",
       "status": "Status",
       "coming": "Coming",
-      "guests": "Guest names",
       "mobile": "Mobile",
       "respondedAt": "Replied",
       "link": "Invitation link",

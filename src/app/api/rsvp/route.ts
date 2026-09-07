@@ -10,10 +10,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "bad json" }, { status: 400 });
   }
 
-  const { code, attending, guestNames, mobile, locale } = (body ?? {}) as {
+  const { code, attending, mobile, locale } = (body ?? {}) as {
     code?: unknown;
     attending?: unknown;
-    guestNames?: unknown;
     mobile?: unknown;
     locale?: unknown;
   };
@@ -30,28 +29,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "not found" }, { status: 404 });
   }
 
-  const names = Array.isArray(guestNames)
-    ? guestNames
-        .filter((n): n is string => typeof n === "string")
-        .map((n) => n.trim())
-        .filter(Boolean)
-        .slice(0, invitation.maxGuests)
-        .map((n) => n.slice(0, 120))
-    : [];
-
-  if (attending && names.length === 0) {
-    return NextResponse.json({ error: "names required" }, { status: 400 });
-  }
-
   const cleanMobile =
     typeof mobile === "string" && mobile.trim()
       ? mobile.trim().slice(0, 24)
       : null;
   const cleanLocale = locale === "en" ? "en" : "ar";
 
+  // A "yes" counts the invitation's full seat allowance; no names collected.
   const data = {
     attending,
-    guestNames: attending ? names : [],
+    guestNames: [],
     mobile: cleanMobile,
     locale: cleanLocale,
   };

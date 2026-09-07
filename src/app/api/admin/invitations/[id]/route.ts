@@ -55,10 +55,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   }
 
   // Planner recording (or clearing) a reply on the family's behalf
-  const reply = body.reply as
-    | { attending?: unknown; guestNames?: unknown; mobile?: unknown }
-    | null
-    | undefined;
+  const reply = body.reply as { attending?: unknown } | null | undefined;
 
   if (reply === null) {
     await prisma.rsvp.deleteMany({ where: { invitationId: id } });
@@ -66,20 +63,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     if (typeof reply.attending !== "boolean") {
       return NextResponse.json({ error: "invalid reply" }, { status: 400 });
     }
-    const maxGuests = data.maxGuests ?? existing.maxGuests;
-    const names = Array.isArray(reply.guestNames)
-      ? reply.guestNames
-          .filter((n): n is string => typeof n === "string")
-          .map((n) => n.trim())
-          .filter(Boolean)
-          .slice(0, maxGuests)
-          .map((n) => n.slice(0, 120))
-      : [];
-    const rsvpData = {
-      attending: reply.attending,
-      guestNames: reply.attending ? names : [],
-      mobile: cleanString(reply.mobile, 24),
-    };
+    const rsvpData = { attending: reply.attending, guestNames: [] };
     await prisma.rsvp.upsert({
       where: { invitationId: id },
       create: { invitationId: id, locale: "ar", ...rsvpData },
