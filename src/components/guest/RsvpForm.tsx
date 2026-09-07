@@ -2,18 +2,22 @@
 
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { localizeNumber } from "@/lib/dates";
 
 type Existing = {
   attending: boolean;
+  guestCount: number | null;
   mobile: string | null;
 } | null;
 
 export function RsvpForm({
   code,
+  maxGuests,
   existing,
   closed,
 }: {
   code: string;
+  maxGuests: number;
   existing: Existing;
   closed: boolean;
 }) {
@@ -25,6 +29,9 @@ export function RsvpForm({
 
   const [attending, setAttending] = useState<boolean | null>(
     existing ? existing.attending : null
+  );
+  const [count, setCount] = useState<number>(
+    existing?.guestCount ?? maxGuests
   );
   const [mobile, setMobile] = useState(existing?.mobile ?? "");
   const [error, setError] = useState<string | null>(null);
@@ -58,12 +65,17 @@ export function RsvpForm({
         body: JSON.stringify({
           code,
           attending,
+          guestCount: attending ? count : 0,
           mobile: mobile.trim() || null,
           locale,
         }),
       });
       if (!res.ok) throw new Error(await res.text());
-      setSaved({ attending, mobile: mobile.trim() || null });
+      setSaved({
+        attending,
+        guestCount: attending ? count : 0,
+        mobile: mobile.trim() || null,
+      });
       setEditing(false);
     } catch {
       setError(t("error"));
@@ -86,12 +98,18 @@ export function RsvpForm({
         <p className="text-lg leading-relaxed text-ink">
           {saved.attending ? t("thanksYes") : t("thanksNo")}
         </p>
+        {saved.attending && (
+          <p className="text-sm text-ink-soft">
+            {t("countLabel")}: {localizeNumber(locale, saved.guestCount ?? maxGuests)}
+          </p>
+        )}
         {!closed && (
           <button
             type="button"
             onClick={() => {
               setEditing(true);
               setAttending(saved.attending);
+              setCount(saved.guestCount ?? maxGuests);
               setMobile(saved.mobile ?? "");
             }}
             className="tracked border-b border-brass pb-0.5 text-xs text-ink-soft transition-colors hover:text-ink"
@@ -134,6 +152,43 @@ export function RsvpForm({
           {t("no")}
         </button>
       </div>
+
+      {attending === true && maxGuests > 1 && (
+        <div className="flex flex-col items-center gap-3">
+          <span className="tracked text-[11px] text-ink-soft">
+            {t("countLabel")}
+          </span>
+          <div className="flex items-center gap-6">
+            <button
+              type="button"
+              onClick={() => setCount((c) => Math.max(1, c - 1))}
+              disabled={count <= 1}
+              aria-label={t("countLess")}
+              className="flex size-12 items-center justify-center border border-olive-700/40 text-xl text-ink transition-colors hover:border-olive-700 disabled:opacity-30"
+            >
+              −
+            </button>
+            <span className="type-display min-w-[2ch] text-center text-4xl tabular-nums text-ink">
+              {localizeNumber(locale, count)}
+            </span>
+            <button
+              type="button"
+              onClick={() => setCount((c) => Math.min(maxGuests, c + 1))}
+              disabled={count >= maxGuests}
+              aria-label={t("countMore")}
+              className="flex size-12 items-center justify-center border border-olive-700/40 text-xl text-ink transition-colors hover:border-olive-700 disabled:opacity-30"
+            >
+              +
+            </button>
+          </div>
+          <span className="text-xs text-ink-soft">
+            {t("allowance", {
+              count: maxGuests,
+              countDisplay: localizeNumber(locale, maxGuests),
+            })}
+          </span>
+        </div>
+      )}
 
       <label className="flex flex-col gap-1.5">
         <span className="tracked text-[11px] text-ink-soft">

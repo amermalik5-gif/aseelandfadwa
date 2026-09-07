@@ -49,7 +49,11 @@ export async function GET(req: NextRequest) {
           : inv.rsvp.attending
             ? "Confirmed / مؤكد"
             : "Declined / معتذر",
-        attendingCount: inv.rsvp?.attending ? inv.maxGuests : inv.rsvp ? 0 : null,
+        attendingCount: inv.rsvp?.attending
+          ? (inv.rsvp.guestCount ?? inv.maxGuests)
+          : inv.rsvp
+            ? 0
+            : null,
         mobile: inv.rsvp?.mobile ?? null,
         respondedAt: inv.rsvp
           ? formatResponseTime("en", inv.rsvp.updatedAt)

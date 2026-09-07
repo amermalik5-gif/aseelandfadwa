@@ -6,6 +6,7 @@ import {
   formatEventDate,
   formatEventTime,
   formatEventWeekday,
+  localizeNumber,
 } from "@/lib/dates";
 import { OliveSprig, RuleDiamond } from "./Ornament";
 import { Reveal } from "./Reveal";
@@ -22,6 +23,7 @@ type Invitation = {
 
 type ExistingRsvp = {
   attending: boolean;
+  guestCount: number | null;
   mobile: string | null;
 } | null;
 
@@ -235,7 +237,10 @@ export async function InvitePage({
                   {invitation.name}
                 </p>
                 <p className="mt-3 text-sm text-ink-soft">
-                  {t("rsvp.allowance", { count: invitation.maxGuests })}
+                  {t("rsvp.allowance", {
+                    count: invitation.maxGuests,
+                    countDisplay: localizeNumber(locale, invitation.maxGuests),
+                  })}
                 </p>
               </div>
               <p className="text-center text-sm text-ink-soft">
@@ -244,6 +249,7 @@ export async function InvitePage({
               <RuleDiamond className="w-40" />
               <RsvpForm
                 code={invitation.code}
+                maxGuests={invitation.maxGuests}
                 existing={existingRsvp}
                 closed={rsvpClosed()}
               />

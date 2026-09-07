@@ -10,9 +10,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "bad json" }, { status: 400 });
   }
 
-  const { code, attending, mobile, locale } = (body ?? {}) as {
+  const { code, attending, guestCount, mobile, locale } = (body ?? {}) as {
     code?: unknown;
     attending?: unknown;
+    guestCount?: unknown;
     mobile?: unknown;
     locale?: unknown;
   };
@@ -35,9 +36,17 @@ export async function POST(req: NextRequest) {
       : null;
   const cleanLocale = locale === "en" ? "en" : "ar";
 
-  // A "yes" counts the invitation's full seat allowance; no names collected.
+  // Attending guests choose how many are coming, capped by the invitation's seats.
+  const rawCount = Number(guestCount);
+  const cleanCount = attending
+    ? Number.isFinite(rawCount) && rawCount >= 1
+      ? Math.min(Math.floor(rawCount), invitation.maxGuests)
+      : invitation.maxGuests
+    : 0;
+
   const data = {
     attending,
+    guestCount: cleanCount,
     guestNames: [],
     mobile: cleanMobile,
     locale: cleanLocale,

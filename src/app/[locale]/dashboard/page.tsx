@@ -34,6 +34,7 @@ export default async function DashboardPage() {
     rsvp: inv.rsvp
       ? {
           attending: inv.rsvp.attending,
+          guestCount: inv.rsvp.guestCount,
           mobile: inv.rsvp.mobile,
           updatedAt: inv.rsvp.updatedAt.toISOString(),
         }

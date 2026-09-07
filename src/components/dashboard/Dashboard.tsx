@@ -73,6 +73,7 @@ export function Dashboard({
   const [ePhone, setEPhone] = useState("");
   const [eTable, setETable] = useState("");
   const [eNotes, setENotes] = useState("");
+  const [eReplyCount, setEReplyCount] = useState(1);
   const [savedId, setSavedId] = useState<string | null>(null);
 
   async function refresh() {
@@ -109,7 +110,7 @@ export function Dashboard({
       const s = statusOf(inv);
       if (s === "confirmed") {
         confirmed++;
-        attending += inv.maxGuests;
+        attending += inv.rsvp!.guestCount ?? inv.maxGuests;
       } else if (s === "declined") declined++;
       else pending++;
     }
@@ -277,6 +278,7 @@ export function Dashboard({
     setEPhone(inv.phone ?? "");
     setETable(inv.tableNo ?? "");
     setENotes(inv.notes ?? "");
+    setEReplyCount(inv.rsvp?.guestCount ?? inv.maxGuests);
   }
 
   async function saveDetails(id: string) {
@@ -292,7 +294,7 @@ export function Dashboard({
   }
 
   async function saveReply(id: string, attending: boolean) {
-    await patch(id, { reply: { attending } });
+    await patch(id, { reply: { attending, guestCount: eReplyCount } });
     setSavedId(id);
     setTimeout(() => setSavedId(null), 1600);
   }
@@ -658,7 +660,9 @@ export function Dashboard({
                         )}
                         <span className={`border px-2.5 py-1 text-[11px] ${chip[s]}`}>
                           {t(`status.${s}`)}
-                          {s === "confirmed" ? ` · ${inv.maxGuests}` : ""}
+                          {s === "confirmed"
+                            ? ` · ${inv.rsvp!.guestCount ?? inv.maxGuests}`
+                            : ""}
                         </span>
                       </div>
                     </div>
@@ -807,6 +811,24 @@ export function Dashboard({
                           <p className="tracked text-[11px] text-ink-soft">
                             {t("details.reply")}
                           </p>
+                          <label className="flex max-w-40 flex-col gap-1 text-[11px] text-ink-soft">
+                            {t("details.replyCount")}
+                            <input
+                              type="number"
+                              min={1}
+                              max={inv.maxGuests}
+                              value={eReplyCount}
+                              onChange={(e) =>
+                                setEReplyCount(
+                                  Math.min(
+                                    inv.maxGuests,
+                                    Math.max(1, Number(e.target.value) || 1)
+                                  )
+                                )
+                              }
+                              className="input-line"
+                            />
+                          </label>
                           <div className="flex flex-wrap gap-2 text-xs">
                             <button
                               type="button"
