@@ -170,7 +170,8 @@ export function Dashboard({
       typeof window !== "undefined"
         ? window.location.origin
         : process.env.NEXT_PUBLIC_SITE_URL ?? "";
-    return `${origin}/${locale}/rsvp/${inv.code}`;
+    // Shared links always open the Arabic version; guests can switch via the toggle.
+    return `${origin}/ar/rsvp/${inv.code}`;
   }
 
   function markSentSilently(inv: InvitationDto) {
