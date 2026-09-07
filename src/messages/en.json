@@ -123,6 +123,14 @@
       "opened": "Opened",
       "table": "Table {n}"
     },
+    "bulk": {
+      "selectAll": "Select all",
+      "selected": "{count, plural, one {# selected} other {# selected}}",
+      "clear": "Clear selection",
+      "delete": "Delete selected",
+      "confirm": "Delete {count} invitations? Their RSVPs will also be removed.",
+      "selectRow": "Select {name}"
+    },
     "details": {
       "open": "Details",
       "close": "Close details",
@@ -186,6 +194,12 @@
       "uploading": "Uploading…",
       "result": "{added, plural, one {# invitation added} other {# invitations added}}, {skipped} skipped (duplicate or invalid)",
       "error": "Could not read that file. Please use the template."
+    },
+    "waTemplate": {
+      "title": "WhatsApp invitation message",
+      "hint": "This message is sent when you tap the WhatsApp button. Write '{name}' to insert the family name. The personal link replaces '{link}', or is added at the end automatically.",
+      "save": "Save message",
+      "saved": "Saved ✓"
     },
     "export": "Export Excel",
     "whatsappMsg": "Dear {name}, you are warmly invited to the wedding of Aseel & Fadwa on Friday 16 Oct 2026, 7:30 PM at EVA Hall, Airport Road, Amman. Please confirm your attendance here: {link}",

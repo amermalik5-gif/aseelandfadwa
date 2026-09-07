@@ -21,6 +21,11 @@ model Invitation {
   rsvp      Rsvp?
 }
 
+model Setting {
+  key   String @id
+  value String
+}
+
 model Rsvp {
   id           String     @id @default(cuid())
   invitation   Invitation @relation(fields: [invitationId], references: [id], onDelete: Cascade)

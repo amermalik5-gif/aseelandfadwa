@@ -1,5 +1,6 @@
 import { isAdmin } from "@/lib/adminSession";
 import { prisma } from "@/lib/prisma";
+import { waMessageDefault } from "@/config/event";
 import { LoginForm } from "@/components/dashboard/LoginForm";
 import { Dashboard } from "@/components/dashboard/Dashboard";
 import type { InvitationDto } from "@/types";
@@ -11,10 +12,13 @@ export default async function DashboardPage() {
     return <LoginForm />;
   }
 
-  const invitations = await prisma.invitation.findMany({
-    include: { rsvp: true },
-    orderBy: { createdAt: "desc" },
-  });
+  const [invitations, waSetting] = await Promise.all([
+    prisma.invitation.findMany({
+      include: { rsvp: true },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.setting.findUnique({ where: { key: "waTemplate" } }),
+  ]);
 
   const initial: InvitationDto[] = invitations.map((inv) => ({
     id: inv.id,
@@ -37,5 +41,10 @@ export default async function DashboardPage() {
       : null,
   }));
 
-  return <Dashboard initial={initial} />;
+  return (
+    <Dashboard
+      initial={initial}
+      waTemplateInitial={waSetting?.value ?? waMessageDefault}
+    />
+  );
 }

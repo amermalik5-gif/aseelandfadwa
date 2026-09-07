@@ -30,7 +30,13 @@ function waPhone(phone: string | null): string {
   return d;
 }
 
-export function Dashboard({ initial }: { initial: InvitationDto[] }) {
+export function Dashboard({
+  initial,
+  waTemplateInitial,
+}: {
+  initial: InvitationDto[];
+  waTemplateInitial: string;
+}) {
   const t = useTranslations("dash");
   const locale = useLocale();
   const router = useRouter();
@@ -42,6 +48,7 @@ export function Dashboard({ initial }: { initial: InvitationDto[] }) {
   const [filter, setFilter] = useState<Filter>("all");
   const [sort, setSort] = useState<Sort>("created");
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   // add form
   const [addName, setAddName] = useState("");
@@ -52,6 +59,12 @@ export function Dashboard({ initial }: { initial: InvitationDto[] }) {
   // upload
   const [uploadBusy, setUploadBusy] = useState(false);
   const [uploadMsg, setUploadMsg] = useState<string | null>(null);
+
+  // whatsapp message template
+  const [waTemplate, setWaTemplate] = useState(waTemplateInitial);
+  const [waDraft, setWaDraft] = useState(waTemplateInitial);
+  const [waSaved, setWaSaved] = useState(false);
+  const [waBusy, setWaBusy] = useState(false);
 
   // expandable details panel
   const [openId, setOpenId] = useState<string | null>(null);
@@ -177,14 +190,40 @@ export function Dashboard({ initial }: { initial: InvitationDto[] }) {
   }
 
   function waHref(inv: InvitationDto, kind: "invite" | "reminder"): string {
-    const msg = t(kind === "invite" ? "whatsappMsg" : "reminderMsg", {
-      name: inv.name,
-      link: linkFor(inv),
-    });
+    const link = linkFor(inv);
+    let msg: string;
+    if (kind === "invite") {
+      msg = waTemplate.replaceAll("{name}", inv.name);
+      msg = msg.includes("{link}")
+        ? msg.replaceAll("{link}", link)
+        : `${msg}\n${link}`;
+    } else {
+      msg = t("reminderMsg", { name: inv.name, link });
+    }
     const phone = waPhone(inv.phone);
     return phone
       ? `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`
       : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+  }
+
+  async function saveWaTemplate() {
+    if (!waDraft.trim()) return;
+    setWaBusy(true);
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ waTemplate: waDraft.trim() }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setWaTemplate(data.waTemplate);
+        setWaSaved(true);
+        setTimeout(() => setWaSaved(false), 1600);
+      }
+    } finally {
+      setWaBusy(false);
+    }
   }
 
   async function addGuest(e: React.FormEvent) {
@@ -268,6 +307,43 @@ export function Dashboard({ initial }: { initial: InvitationDto[] }) {
   async function remove(inv: InvitationDto) {
     if (!window.confirm(t("actions.confirmDelete", { name: inv.name }))) return;
     await fetch(`/api/admin/invitations/${inv.id}`, { method: "DELETE" });
+    setOpenId(null);
+    await refresh();
+  }
+
+  function toggleSelected(id: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  const allVisibleSelected =
+    visible.length > 0 && visible.every((inv) => selected.has(inv.id));
+
+  function toggleSelectAll() {
+    setSelected((prev) => {
+      if (allVisibleSelected) {
+        const next = new Set(prev);
+        for (const inv of visible) next.delete(inv.id);
+        return next;
+      }
+      return new Set([...prev, ...visible.map((inv) => inv.id)]);
+    });
+  }
+
+  async function bulkDelete() {
+    const ids = [...selected];
+    if (ids.length === 0) return;
+    if (!window.confirm(t("bulk.confirm", { count: ids.length }))) return;
+    await fetch("/api/admin/invitations", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids }),
+    });
+    setSelected(new Set());
     setOpenId(null);
     await refresh();
   }
@@ -431,6 +507,33 @@ export function Dashboard({ initial }: { initial: InvitationDto[] }) {
           </div>
         </section>
 
+        {/* whatsapp message template */}
+        <section className="flex flex-col gap-4 border border-brass/30 p-5">
+          <h2 className="tracked text-[11px] text-ink-soft">
+            {t("waTemplate.title")}
+          </h2>
+          <p className="text-xs leading-relaxed text-ink-soft">
+            {t("waTemplate.hint")}
+          </p>
+          <textarea
+            value={waDraft}
+            onChange={(e) => setWaDraft(e.target.value)}
+            rows={6}
+            dir="auto"
+            className="input-line resize-y leading-relaxed"
+          />
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={saveWaTemplate}
+              disabled={waBusy || !waDraft.trim() || waDraft.trim() === waTemplate}
+              className="tracked min-h-11 bg-olive-700 px-5 py-2.5 text-[11px] text-cream transition-opacity hover:opacity-90 disabled:opacity-50"
+            >
+              {waSaved ? t("waTemplate.saved") : t("waTemplate.save")}
+            </button>
+          </div>
+        </section>
+
         {/* search + filter + sort */}
         <section className="flex flex-col gap-4">
           <input
@@ -477,6 +580,40 @@ export function Dashboard({ initial }: { initial: InvitationDto[] }) {
 
         {/* list */}
         <section className="flex flex-col">
+          {visible.length > 0 && (
+            <div className="flex flex-wrap items-center gap-3 pb-3 text-xs">
+              <label className="flex cursor-pointer items-center gap-2 text-ink-soft">
+                <input
+                  type="checkbox"
+                  checked={allVisibleSelected}
+                  onChange={toggleSelectAll}
+                  className="size-4 accent-olive-700"
+                />
+                {t("bulk.selectAll")}
+              </label>
+              {selected.size > 0 && (
+                <>
+                  <span className="text-ink">
+                    {t("bulk.selected", { count: selected.size })}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={bulkDelete}
+                    className="min-h-10 border border-clay/50 px-3 py-2 text-clay transition-colors hover:border-clay"
+                  >
+                    {t("bulk.delete")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelected(new Set())}
+                    className="min-h-10 border border-olive-700/40 px-3 py-2 text-ink-soft transition-colors hover:border-olive-700"
+                  >
+                    {t("bulk.clear")}
+                  </button>
+                </>
+              )}
+            </div>
+          )}
           {invitations.length === 0 ? (
             <p className="py-10 text-center text-sm text-ink-soft">
               {t("table.empty")}
@@ -493,21 +630,32 @@ export function Dashboard({ initial }: { initial: InvitationDto[] }) {
                 return (
                   <li key={inv.id} className="flex flex-col gap-3 py-4">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div className="flex items-center gap-3">
+                      <label className="flex cursor-pointer items-center gap-3">
+                        <input
+                          type="checkbox"
+                          checked={selected.has(inv.id)}
+                          onChange={() => toggleSelected(inv.id)}
+                          aria-label={t("bulk.selectRow", { name: inv.name })}
+                          className="size-4 shrink-0 accent-olive-700"
+                        />
                         <span className="text-base font-medium">{inv.name}</span>
                         <span className="text-xs text-ink-soft">
                           {inv.maxGuests} · {t("table.seats")}
                         </span>
-                      </div>
+                      </label>
                       <div className="flex flex-wrap items-center gap-1.5">
                         {inv.tableNo && (
                           <span className="border border-brass/50 px-2 py-1 text-[11px] text-ink-soft">
                             {t("badges.table", { n: inv.tableNo })}
                           </span>
                         )}
-                        {inv.sentAt && (
-                          <span className="border border-olive-700/30 px-2 py-1 text-[11px] text-ink-soft">
-                            {t("badges.sent")}
+                        {inv.sentAt ? (
+                          <span className="border border-olive-700/60 bg-olive-700/10 px-2 py-1 text-[11px] font-medium text-olive-700">
+                            ✓ {t("badges.sent")}
+                          </span>
+                        ) : (
+                          <span className="border border-clay/50 px-2 py-1 text-[11px] text-clay">
+                            {t("filter.notSent")}
                           </span>
                         )}
                         {inv.viewedAt && (
@@ -540,6 +688,12 @@ export function Dashboard({ initial }: { initial: InvitationDto[] }) {
                               {formatResponseTime(locale, new Date(inv.rsvp.updatedAt))}
                             </span>
                           )}
+                          {inv.sentAt && (
+                            <span>
+                              {t("details.sentOn")}:{" "}
+                              {formatResponseTime(locale, new Date(inv.sentAt))}
+                            </span>
+                          )}
                         </span>
                       </div>
                     )}
@@ -553,9 +707,13 @@ export function Dashboard({ initial }: { initial: InvitationDto[] }) {
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={() => markSentSilently(inv)}
-                        className={btn}
+                        className={
+                          inv.sentAt
+                            ? btn
+                            : "min-h-10 bg-olive-700 px-3 py-2 text-cream transition-opacity hover:opacity-90"
+                        }
                       >
-                        {t("actions.whatsapp")}
+                        {inv.sentAt ? `✓ ${t("actions.whatsapp")}` : t("actions.whatsapp")}
                       </a>
                       {s === "pending" && inv.sentAt && (
                         <a

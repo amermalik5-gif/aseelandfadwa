@@ -14,6 +14,29 @@ export async function GET() {
   return NextResponse.json({ invitations });
 }
 
+export async function DELETE(req: NextRequest) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
+  let ids: string[] = [];
+  try {
+    const body = await req.json();
+    if (Array.isArray(body?.ids)) {
+      ids = body.ids.filter((v: unknown): v is string => typeof v === "string");
+    }
+  } catch {
+    // handled below
+  }
+  if (ids.length === 0) {
+    return NextResponse.json({ error: "ids required" }, { status: 400 });
+  }
+
+  const result = await prisma.invitation.deleteMany({
+    where: { id: { in: ids.slice(0, 500) } },
+  });
+  return NextResponse.json({ deleted: result.count });
+}
+
 export async function POST(req: NextRequest) {
   const denied = await requireAdmin();
   if (denied) return denied;

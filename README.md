@@ -11,6 +11,10 @@ Everything about the event lives in [src/config/event.ts](src/config/event.ts) (
 
 Optional background music: drop an `music.mp3` file into `public/audio/` — the music button appears automatically.
 
+WhatsApp link-preview thumbnail: replace `public/og.jpg` with any 1200×630 image (keep it under ~500 KB). Note that WhatsApp caches previews, so an already-shared link may keep showing the old image for a while.
+
+The ready-made WhatsApp invitation text is editable in the dashboard ("WhatsApp invitation message" card); `{name}` inserts the family name and the personal link is appended automatically (or placed at `{link}`).
+
 ## Local development
 
 ```bash
