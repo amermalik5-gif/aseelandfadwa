@@ -51,13 +51,19 @@ export const event = {
   hallCapacity: 250,
 } as const;
 
-// Default WhatsApp invitation message (editable from the dashboard, stored in DB).
+// Default WhatsApp messages (editable from the dashboard, stored in DB).
 // {name} = family name, {link} = personal RSVP link (appended at the end if omitted).
+// Note: ♡ is used instead of the 🤍 emoji, which shows as "?" on older phones.
 export const waMessageDefault = `نتشرف بدعوتكم لحضور حفل زفاف
-أصيل و فدوى 🤍
+أصيل و فدوى ♡
 وجودكم معنا يسعدنا ويكمل فرحتنا.
 
 يرجى تأكيد الحضور من خلال الرابط أدناه.
+{link}`;
+
+export const reminderMessageDefault = `نذكّركم بلطف بتأكيد حضوركم حفل زفاف
+أصيل و فدوى ♡
+يرجى تأكيد الحضور قبل ١١ تشرين الأول من خلال الرابط أدناه.
 {link}`;
 
 export const eventDate = new Date(event.dateISO);

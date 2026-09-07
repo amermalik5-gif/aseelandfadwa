@@ -33,9 +33,11 @@ function waPhone(phone: string | null): string {
 export function Dashboard({
   initial,
   waTemplateInitial,
+  reminderTemplateInitial,
 }: {
   initial: InvitationDto[];
   waTemplateInitial: string;
+  reminderTemplateInitial: string;
 }) {
   const t = useTranslations("dash");
   const locale = useLocale();
@@ -60,9 +62,11 @@ export function Dashboard({
   const [uploadBusy, setUploadBusy] = useState(false);
   const [uploadMsg, setUploadMsg] = useState<string | null>(null);
 
-  // whatsapp message template
+  // whatsapp message templates
   const [waTemplate, setWaTemplate] = useState(waTemplateInitial);
   const [waDraft, setWaDraft] = useState(waTemplateInitial);
+  const [remTemplate, setRemTemplate] = useState(reminderTemplateInitial);
+  const [remDraft, setRemDraft] = useState(reminderTemplateInitial);
   const [waSaved, setWaSaved] = useState(false);
   const [waBusy, setWaBusy] = useState(false);
 
@@ -191,33 +195,33 @@ export function Dashboard({
 
   function waHref(inv: InvitationDto, kind: "invite" | "reminder"): string {
     const link = linkFor(inv);
-    let msg: string;
-    if (kind === "invite") {
-      msg = waTemplate.replaceAll("{name}", inv.name);
-      msg = msg.includes("{link}")
-        ? msg.replaceAll("{link}", link)
-        : `${msg}\n${link}`;
-    } else {
-      msg = t("reminderMsg", { name: inv.name, link });
-    }
+    const template = kind === "invite" ? waTemplate : remTemplate;
+    let msg = template.replaceAll("{name}", inv.name);
+    msg = msg.includes("{link}")
+      ? msg.replaceAll("{link}", link)
+      : `${msg}\n${link}`;
     const phone = waPhone(inv.phone);
     return phone
       ? `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`
       : `https://wa.me/?text=${encodeURIComponent(msg)}`;
   }
 
-  async function saveWaTemplate() {
-    if (!waDraft.trim()) return;
+  async function saveWaTemplates() {
+    if (!waDraft.trim() || !remDraft.trim()) return;
     setWaBusy(true);
     try {
       const res = await fetch("/api/admin/settings", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ waTemplate: waDraft.trim() }),
+        body: JSON.stringify({
+          waTemplate: waDraft.trim(),
+          reminderTemplate: remDraft.trim(),
+        }),
       });
       if (res.ok) {
         const data = await res.json();
         setWaTemplate(data.waTemplate);
+        setRemTemplate(data.reminderTemplate);
         setWaSaved(true);
         setTimeout(() => setWaSaved(false), 1600);
       }
@@ -503,7 +507,7 @@ export function Dashboard({
           </div>
         </section>
 
-        {/* whatsapp message template */}
+        {/* whatsapp message templates */}
         <section className="flex flex-col gap-4 border border-brass/30 p-5">
           <h2 className="tracked text-[11px] text-ink-soft">
             {t("waTemplate.title")}
@@ -511,18 +515,36 @@ export function Dashboard({
           <p className="text-xs leading-relaxed text-ink-soft">
             {t("waTemplate.hint")}
           </p>
-          <textarea
-            value={waDraft}
-            onChange={(e) => setWaDraft(e.target.value)}
-            rows={6}
-            dir="auto"
-            className="input-line resize-y leading-relaxed"
-          />
+          <label className="flex flex-col gap-1 text-[11px] text-ink-soft">
+            {t("waTemplate.inviteLabel")}
+            <textarea
+              value={waDraft}
+              onChange={(e) => setWaDraft(e.target.value)}
+              rows={6}
+              dir="auto"
+              className="input-line resize-y leading-relaxed"
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-[11px] text-ink-soft">
+            {t("waTemplate.reminderLabel")}
+            <textarea
+              value={remDraft}
+              onChange={(e) => setRemDraft(e.target.value)}
+              rows={4}
+              dir="auto"
+              className="input-line resize-y leading-relaxed"
+            />
+          </label>
           <div className="flex items-center gap-3">
             <button
               type="button"
-              onClick={saveWaTemplate}
-              disabled={waBusy || !waDraft.trim() || waDraft.trim() === waTemplate}
+              onClick={saveWaTemplates}
+              disabled={
+                waBusy ||
+                !waDraft.trim() ||
+                !remDraft.trim() ||
+                (waDraft.trim() === waTemplate && remDraft.trim() === remTemplate)
+              }
               className="tracked min-h-11 bg-olive-700 px-5 py-2.5 text-[11px] text-cream transition-opacity hover:opacity-90 disabled:opacity-50"
             >
               {waSaved ? t("waTemplate.saved") : t("waTemplate.save")}

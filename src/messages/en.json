@@ -191,13 +191,14 @@
       "error": "Could not read that file. Please use the template."
     },
     "waTemplate": {
-      "title": "WhatsApp invitation message",
-      "hint": "This message is sent when you tap the WhatsApp button. Write '{name}' to insert the family name. The personal link replaces '{link}', or is added at the end automatically.",
-      "save": "Save message",
+      "title": "WhatsApp messages",
+      "hint": "These messages are sent by the WhatsApp and Remind buttons. Write '{name}' to insert the family name. The personal link replaces '{link}', or is added at the end automatically.",
+      "inviteLabel": "Invitation message",
+      "reminderLabel": "Reminder message",
+      "save": "Save messages",
       "saved": "Saved ✓"
     },
     "export": "Export Excel",
-    "whatsappMsg": "Dear {name}, you are warmly invited to the wedding of Aseel & Fadwa on Friday 16 Oct 2026, 7:30 PM at EVA Hall, Airport Road, Amman. Please confirm your attendance here: {link}",
-    "reminderMsg": "Dear {name}, a gentle reminder to confirm your attendance at the wedding of Aseel & Fadwa (Friday 16 Oct 2026, 7:30 PM, EVA Hall) before 11 October: {link}"
+    "whatsappMsg": "Dear {name}, you are warmly invited to the wedding of Aseel & Fadwa on Friday 16 Oct 2026, 7:30 PM at EVA Hall, Airport Road, Amman. Please confirm your attendance here: {link}"
   }
 }
