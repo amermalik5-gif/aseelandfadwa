@@ -48,7 +48,7 @@ export const event = {
   ],
 
   // Seats available in the hall; the dashboard shows remaining capacity.
-  hallCapacity: 400,
+  hallCapacity: 250,
 } as const;
 
 export const eventDate = new Date(event.dateISO);
