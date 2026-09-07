@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Aseel & Fadwa — Wedding RSVP • أصيل وفدوى
 
-## Getting Started
+Bilingual (Arabic RTL / English) wedding invitation and RSVP site with a private planner dashboard.
 
-First, run the development server:
+- **Guest site**: `/{ar|en}/rsvp/<code>` — personal invitation link per family: hero, event details, add-to-calendar, countdown, and an RSVP form capped to that family's seats. Guests can edit their reply until the deadline.
+- **Dashboard**: `/ar/dashboard` or `/en/dashboard` — password-protected. Live stats (confirmed / declined / pending / seats / guests attending), search & filters, add guests one-by-one, Excel upload of the whole guest list, Excel export, copy link & WhatsApp share per family.
+
+## Event configuration
+
+Everything about the event lives in [src/config/event.ts](src/config/event.ts) (names, date, venue, maps link, RSVP deadline) and the copy in [src/messages/ar.json](src/messages/ar.json) / [src/messages/en.json](src/messages/en.json).
+
+Optional background music: drop an `music.mp3` file into `public/audio/` — the music button appears automatically.
+
+## Local development
 
 ```bash
+npm install
+npx prisma migrate deploy   # apply schema to the DATABASE_URL in .env
+npm run seed                # optional demo invitations
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Environment variables (see `.env.example`):
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Variable | Purpose |
+|---|---|
+| `DATABASE_URL` | Postgres connection string |
+| `DASHBOARD_PASSWORD` | Password for the planner dashboard |
+| `SESSION_SECRET` | Random string that signs the dashboard session cookie |
+| `NEXT_PUBLIC_SITE_URL` | Public URL used to build invitation links |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Excel guest list
 
-## Learn More
+Upload columns (first row may be a header, Arabic or English):
 
-To learn more about Next.js, take a look at the following resources:
+| Name / الاسم | Invites / عدد الدعوات | Phone / الهاتف (optional) |
+|---|---|---|
+| عائلة محمد أحمد | 4 | 0791234567 |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Download the exact template from the dashboard ("Download template"). Rows whose name already exists are skipped, so re-uploading is safe. Each imported row gets a unique personal link.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Deployment (Railway)
 
-## Deploy on Vercel
+The project deploys as a single Railway service plus the Postgres database. [railway.json](railway.json) sets the start command (`prisma migrate deploy` + `next start`).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Required service variables:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `DATABASE_URL` → `${{Postgres.DATABASE_URL}}` (reference)
+- `DASHBOARD_PASSWORD`, `SESSION_SECRET`
+- `NEXT_PUBLIC_SITE_URL` → the public Railway domain
+
+Deploy with `railway up`, or connect the GitHub repo in the Railway dashboard for auto-deploys on push.
+
+## Stack
+
+Next.js (App Router) · TypeScript · Tailwind CSS 4 · next-intl (ar default, RTL) · Prisma + PostgreSQL · SheetJS

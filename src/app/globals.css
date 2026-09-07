@@ -1,26 +1,185 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --olive-950: oklch(0.28 0.03 130);
+  --olive-900: oklch(0.33 0.035 130);
+  --olive-800: oklch(0.38 0.038 129);
+  --olive-700: oklch(0.45 0.04 128);
+  --ivory-50: oklch(0.955 0.012 90);
+  --ivory-100: oklch(0.93 0.015 90);
+  --cream: oklch(0.92 0.02 95);
+  --cream-dim: oklch(0.8 0.02 100);
+  --ink: oklch(0.36 0.03 125);
+  --ink-soft: oklch(0.5 0.025 120);
+  --brass: oklch(0.68 0.06 95);
+  --clay: oklch(0.55 0.06 40);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-olive-950: var(--olive-950);
+  --color-olive-900: var(--olive-900);
+  --color-olive-800: var(--olive-800);
+  --color-olive-700: var(--olive-700);
+  --color-ivory-50: var(--ivory-50);
+  --color-ivory-100: var(--ivory-100);
+  --color-cream: var(--cream);
+  --color-cream-dim: var(--cream-dim);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-brass: var(--brass);
+  --color-clay: var(--clay);
+
+  --font-serif-display: var(--font-marcellus), var(--font-amiri), serif;
+  --font-script: var(--font-great-vibes), var(--font-aref-ruqaa), cursive;
+  --font-body: var(--font-tajawal), system-ui, sans-serif;
+
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--ivory-50);
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* English display type: Marcellus. Arabic display swaps to Amiri via :lang. */
+.type-display {
+  font-family: var(--font-marcellus), serif;
+}
+:lang(ar) .type-display,
+.type-display:lang(ar) {
+  font-family: var(--font-amiri), serif;
+}
+
+/* Couple names: Great Vibes (en) / Aref Ruqaa (ar) */
+.type-names {
+  font-family: var(--font-great-vibes), cursive;
+}
+:lang(ar) .type-names,
+.type-names:lang(ar) {
+  font-family: var(--font-aref-ruqaa), serif;
+}
+
+/* Letter-spaced caps read wrong in Arabic; drop tracking there */
+.tracked {
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+:lang(ar) .tracked {
+  letter-spacing: 0.02em;
+}
+.tracked-wide {
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+:lang(ar) .tracked-wide {
+  letter-spacing: 0.04em;
+}
+
+/* Barely-there paper grain for ivory sections */
+.grain {
+  position: relative;
+}
+.grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Hero vignette: candle-glow center on olive night */
+.hero-vignette {
+  background:
+    radial-gradient(
+      ellipse 62% 48% at 50% 46%,
+      var(--olive-800) 0%,
+      var(--olive-900) 45%,
+      var(--olive-950) 100%
+    );
+}
+
+/* Scroll reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 700ms var(--ease-out-quint),
+    transform 700ms var(--ease-out-quint);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Slow fade-up choreography for the hero on load */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.rise {
+  animation: rise-in 900ms var(--ease-out-quint) both;
+}
+.rise-1 { animation-delay: 150ms; }
+.rise-2 { animation-delay: 450ms; }
+.rise-3 { animation-delay: 750ms; }
+.rise-4 { animation-delay: 1050ms; }
+@media (prefers-reduced-motion: reduce) {
+  .rise {
+    animation: none;
+  }
+}
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}
+.bob {
+  animation: bob 2.2s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .bob { animation: none; }
+}
+
+/* Underline inputs (invitation register, not SaaS boxes) */
+.input-line {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid color-mix(in oklab, var(--ink-soft) 55%, transparent);
+  border-radius: 0;
+  padding: 0.625rem 0;
+  font-size: 1rem;
+  color: var(--ink);
+  transition: border-color 200ms var(--ease-out-quint), box-shadow 200ms var(--ease-out-quint);
+}
+.input-line::placeholder {
+  color: color-mix(in oklab, var(--ink-soft) 65%, transparent);
+}
+.input-line:focus {
+  outline: none;
+  border-bottom-color: var(--brass);
+  box-shadow: 0 1px 0 0 var(--brass);
 }

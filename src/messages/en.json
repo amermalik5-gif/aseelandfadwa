@@ -1,0 +1,140 @@
+{
+  "meta": {
+    "title": "Aseel & Fadwa • 16 Oct 2026",
+    "description": "You are warmly invited to the wedding of Aseel & Fadwa on Friday, 16 October 2026 at EVA Hall, Amman."
+  },
+  "hero": {
+    "tagline": "Together with their families",
+    "invite": "You are warmly invited to our wedding celebration",
+    "rsvp": "RSVP",
+    "scroll": "Scroll"
+  },
+  "details": {
+    "title": "Wedding Details",
+    "calendar": "Add to calendar",
+    "location": "View location"
+  },
+  "countdown": {
+    "title": "The Wedding Night",
+    "subtitle": "The wait is almost over",
+    "days": "Days",
+    "hours": "Hours",
+    "minutes": "Minutes",
+    "seconds": "Seconds",
+    "closing": "We cannot wait to celebrate with you"
+  },
+  "rsvp": {
+    "title": "RSVP",
+    "greeting": "A personal invitation for",
+    "deadline": "Kindly confirm your attendance by {date}",
+    "mobile": "Mobile number",
+    "optional": "optional",
+    "mobileInvalid": "Please enter a valid mobile number",
+    "guestsLabel": "Number of guests, including you",
+    "allowance": "This invitation admits {count, plural, one {one guest} two {two guests} other {up to # guests}}",
+    "namesLabel": "Guest names",
+    "namesHint": "One full name per seat",
+    "guestField": "Guest {n} full name",
+    "nameRequired": "Please enter every guest's name",
+    "addGuest": "Add another guest",
+    "yes": "Yes, we will be there",
+    "no": "Sorry, we are unable to attend",
+    "chooseAnswer": "Please choose an answer",
+    "confirm": "Confirm",
+    "sending": "Sending…",
+    "thanksYes": "Your attendance is confirmed. We cannot wait to celebrate with you!",
+    "thanksNo": "Thank you for letting us know. You will be dearly missed.",
+    "edit": "Edit my response",
+    "closed": "The RSVP period has ended. If your plans changed, please reach out to the families directly.",
+    "error": "Something went wrong. Please try again.",
+    "noCode": "To confirm your attendance, please open the personal invitation link you received.",
+    "respondedOn": "Response received"
+  },
+  "invalid": {
+    "title": "Invitation not found",
+    "body": "Please check the invitation link you received, or contact the families.",
+    "cta": "Open the invitation"
+  },
+  "footer": {
+    "names": "Aseel & Fadwa",
+    "year": "2026"
+  },
+  "music": {
+    "play": "Play music",
+    "pause": "Pause music"
+  },
+  "lang": {
+    "switch": "العربية"
+  },
+  "dash": {
+    "title": "Planner Dashboard",
+    "login": {
+      "title": "Planner sign in",
+      "password": "Password",
+      "submit": "Sign in",
+      "wrong": "Incorrect password"
+    },
+    "logout": "Sign out",
+    "stats": {
+      "families": "Invitations",
+      "confirmed": "Confirmed",
+      "declined": "Declined",
+      "pending": "Awaiting reply",
+      "seats": "Seats offered",
+      "attending": "Guests attending"
+    },
+    "search": "Search by name or phone…",
+    "filter": {
+      "all": "All",
+      "confirmed": "Confirmed",
+      "declined": "Declined",
+      "pending": "Pending"
+    },
+    "table": {
+      "name": "Name",
+      "seats": "Seats",
+      "status": "Status",
+      "coming": "Coming",
+      "guests": "Guest names",
+      "mobile": "Mobile",
+      "respondedAt": "Replied",
+      "link": "Invitation link",
+      "empty": "No invitations yet. Add guests below or upload an Excel sheet.",
+      "noMatch": "No invitations match your search."
+    },
+    "status": {
+      "confirmed": "Confirmed",
+      "declined": "Declined",
+      "pending": "Pending"
+    },
+    "actions": {
+      "copy": "Copy link",
+      "copied": "Copied!",
+      "whatsapp": "WhatsApp",
+      "edit": "Edit",
+      "delete": "Delete",
+      "save": "Save",
+      "cancel": "Cancel",
+      "confirmDelete": "Delete the invitation for “{name}”? Their RSVP will also be removed."
+    },
+    "add": {
+      "title": "Add a guest",
+      "name": "Family or guest name",
+      "seats": "Number of seats",
+      "phone": "Phone (optional)",
+      "submit": "Create invitation",
+      "created": "Invitation created"
+    },
+    "upload": {
+      "title": "Upload guest list (Excel)",
+      "hint": "Columns: Name, Invites, Phone (optional). The first row can be a header.",
+      "choose": "Choose .xlsx file",
+      "template": "Download template",
+      "uploading": "Uploading…",
+      "result": "{added, plural, one {# invitation added} other {# invitations added}}, {skipped} skipped (duplicate or invalid)",
+      "error": "Could not read that file. Please use the template."
+    },
+    "export": "Export Excel",
+    "whatsappMsg": "Dear {name}, you are warmly invited to the wedding of Aseel & Fadwa on Friday 16 Oct 2026, 7:30 PM at EVA Hall, Airport Road, Amman. Please confirm your attendance here: {link}"
+  }
+}
