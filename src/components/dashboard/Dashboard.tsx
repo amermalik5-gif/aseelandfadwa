@@ -196,9 +196,10 @@ export function Dashboard({
   function waHref(inv: InvitationDto, kind: "invite" | "reminder"): string {
     const link = linkFor(inv);
     const template = kind === "invite" ? waTemplate : remTemplate;
-    let msg = template.replaceAll("{name}", inv.name);
-    msg = msg.includes("{link}")
-      ? msg.replaceAll("{link}", link)
+    // Tokens are case-insensitive so {name} / {Name} / {NAME} all work
+    let msg = template.replace(/\{name\}/gi, inv.name);
+    msg = /\{link\}/i.test(msg)
+      ? msg.replace(/\{link\}/gi, link)
       : `${msg}\n${link}`;
     const phone = waPhone(inv.phone);
     return phone
