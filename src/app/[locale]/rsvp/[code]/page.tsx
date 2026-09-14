@@ -32,14 +32,14 @@ export default async function RsvpByCode({
   if (!invitation) {
     const t = await getTranslations({ locale, namespace: "invalid" });
     return (
-      <main className="hero-vignette flex min-h-svh flex-col items-center justify-center gap-6 px-6 text-center text-cream">
+      <main className="grain flex min-h-svh flex-col items-center justify-center gap-6 bg-paper px-6 text-center text-ink">
         <h1 className="type-display text-3xl">{t("title")}</h1>
-        <p className="max-w-sm text-sm leading-relaxed text-cream-dim">
+        <p className="max-w-sm text-sm leading-relaxed text-ink-soft">
           {t("body")}
         </p>
         <Link
           href="/"
-          className="tracked mt-2 border border-cream/45 px-6 py-3 text-xs text-cream transition-colors hover:bg-cream hover:text-olive-950"
+          className="tracked mt-2 bg-olive-700 px-6 py-3 text-xs text-cream transition-opacity hover:opacity-90"
         >
           {t("cta")}
         </Link>

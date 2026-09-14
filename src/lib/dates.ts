@@ -3,11 +3,11 @@ import { event, eventDate, rsvpDeadline } from "@/config/event";
 const TZ = event.timeZone;
 
 function intlLocale(locale: string): string {
-  // Levantine month names + Arabic-Indic digits for Arabic
-  return locale === "ar" ? "ar-JO-u-nu-arab" : "en-GB";
+  // ar-EG month names (أكتوبر rather than the Levantine names) + Arabic-Indic digits
+  return locale === "ar" ? "ar-EG-u-nu-arab" : "en-GB";
 }
 
-/** "16 Oct 2026" / "١٦ تشرين الأول ٢٠٢٦" */
+/** "16 Oct 2026" / "١٦ أكتوبر ٢٠٢٦" */
 export function formatEventDate(locale: string): string {
   return new Intl.DateTimeFormat(intlLocale(locale), {
     day: "numeric",
@@ -35,7 +35,7 @@ export function formatEventTime(locale: string): string {
   }).format(eventDate);
 }
 
-/** "11 October 2026" / "١١ تشرين الأول ٢٠٢٦" */
+/** "11 October 2026" / "١١ أكتوبر ٢٠٢٦" */
 export function formatDeadline(locale: string): string {
   return new Intl.DateTimeFormat(intlLocale(locale), {
     day: "numeric",
@@ -58,7 +58,7 @@ export function formatAgendaTime(locale: string, time: string): string {
 
 /** Short date-time for the dashboard, always Amman time */
 export function formatResponseTime(locale: string, date: Date): string {
-  return new Intl.DateTimeFormat(locale === "ar" ? "ar-JO" : "en-GB", {
+  return new Intl.DateTimeFormat(locale === "ar" ? "ar-EG" : "en-GB", {
     day: "numeric",
     month: "short",
     hour: "numeric",

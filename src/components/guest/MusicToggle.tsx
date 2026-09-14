@@ -45,7 +45,7 @@ export function MusicToggle() {
       type="button"
       onClick={toggle}
       aria-label={playing ? t("pause") : t("play")}
-      className="fixed bottom-4 z-40 flex size-11 items-center justify-center rounded-full border border-cream/25 bg-olive-950/50 text-cream/90 backdrop-blur-sm transition-colors hover:bg-olive-950/70 ltr:right-4 rtl:left-4"
+      className="fixed bottom-4 z-40 flex size-11 items-center justify-center rounded-full border border-ink-soft/30 bg-paper/85 text-ink-soft shadow-sm backdrop-blur-sm transition-colors hover:text-ink ltr:right-4 rtl:left-4"
     >
       {playing ? (
         <svg viewBox="0 0 24 24" className="size-4" fill="currentColor" aria-hidden="true">

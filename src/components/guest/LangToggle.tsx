@@ -18,7 +18,7 @@ export function LangToggle() {
 
   return (
     <div
-      className="fixed top-4 z-40 flex overflow-hidden rounded-full border border-cream/25 bg-olive-950/40 text-[11px] backdrop-blur-sm ltr:left-4 rtl:right-4"
+      className="fixed top-4 z-40 flex overflow-hidden rounded-full border border-ink-soft/30 bg-paper/85 text-[11px] shadow-sm backdrop-blur-sm ltr:left-4 rtl:right-4"
       role="group"
       aria-label="Language"
     >
@@ -26,7 +26,7 @@ export function LangToggle() {
         type="button"
         onClick={() => switchTo("en")}
         className={`min-w-11 px-3 py-2 font-medium tracking-widest transition-colors ${
-          locale === "en" ? "bg-cream text-olive-950" : "text-cream/80"
+          locale === "en" ? "bg-olive-700 text-cream" : "text-ink-soft"
         }`}
       >
         EN
@@ -35,7 +35,7 @@ export function LangToggle() {
         type="button"
         onClick={() => switchTo("ar")}
         className={`min-w-11 px-3 py-2 font-medium transition-colors ${
-          locale === "ar" ? "bg-cream text-olive-950" : "text-cream/80"
+          locale === "ar" ? "bg-olive-700 text-cream" : "text-ink-soft"
         }`}
       >
         عربي

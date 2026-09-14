@@ -13,6 +13,20 @@
   --ink-soft: oklch(0.5 0.025 120);
   --brass: oklch(0.68 0.06 95);
   --clay: oklch(0.55 0.06 40);
+  /* floral watercolor theme */
+  --paper: oklch(0.975 0.008 90);
+  --rose: oklch(0.5 0.13 22);
+  --rose-soft: oklch(0.68 0.09 20);
+  --blush: oklch(0.93 0.025 20);
+  --leaf: oklch(0.55 0.07 145);
+  --leaf-deep: oklch(0.42 0.06 142);
+  --sage: oklch(0.74 0.045 135);
+  --gold: oklch(0.74 0.09 88);
+  /* bas-relief plaster scale: ivory/beige tone-on-tone */
+  --beige-100: oklch(0.945 0.012 85);
+  --beige-200: oklch(0.905 0.016 83);
+  --beige-300: oklch(0.858 0.02 80);
+  --beige-400: oklch(0.775 0.025 78);
 }
 
 @theme inline {
@@ -28,6 +42,18 @@
   --color-ink-soft: var(--ink-soft);
   --color-brass: var(--brass);
   --color-clay: var(--clay);
+  --color-paper: var(--paper);
+  --color-rose: var(--rose);
+  --color-rose-soft: var(--rose-soft);
+  --color-blush: var(--blush);
+  --color-leaf: var(--leaf);
+  --color-leaf-deep: var(--leaf-deep);
+  --color-sage: var(--sage);
+  --color-gold: var(--gold);
+  --color-beige-100: var(--beige-100);
+  --color-beige-200: var(--beige-200);
+  --color-beige-300: var(--beige-300);
+  --color-beige-400: var(--beige-400);
 
   --font-serif-display: var(--font-marcellus), var(--font-amiri), serif;
   --font-script: var(--font-great-vibes), var(--font-aref-ruqaa), cursive;
@@ -117,11 +143,87 @@ body {
   opacity: 1;
   transform: none;
 }
+/* Staggered variant: the container stays put, its children glide in one after
+   another. Delays via nth-child, or per-element with style="--d: ..." */
+.reveal.stagger {
+  opacity: 1;
+  transform: none;
+}
+.reveal.stagger > *,
+.reveal .stagger-item {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 800ms var(--ease-out-quint),
+    transform 800ms var(--ease-out-quint);
+  transition-delay: var(--d, 0ms);
+}
+.reveal.stagger.is-visible > *,
+.reveal.is-visible .stagger-item {
+  opacity: 1;
+  transform: none;
+}
+.reveal.stagger.is-visible > *:nth-child(2) { transition-delay: 120ms; }
+.reveal.stagger.is-visible > *:nth-child(3) { transition-delay: 240ms; }
+.reveal.stagger.is-visible > *:nth-child(4) { transition-delay: 360ms; }
+.reveal.stagger.is-visible > *:nth-child(5) { transition-delay: 480ms; }
+.reveal.stagger.is-visible > *:nth-child(6) { transition-delay: 600ms; }
+.reveal.stagger.is-visible > *:nth-child(7) { transition-delay: 720ms; }
+.reveal.stagger.is-visible > *:nth-child(8) { transition-delay: 840ms; }
+
+/* Hero corner bouquets breathe in slowly once the hero is reached */
+.reveal .hero-orn {
+  opacity: 0;
+  transition: opacity 1400ms var(--ease-out-quint) 250ms;
+}
+.reveal.is-visible .hero-orn {
+  opacity: 1;
+}
+
+/* Engraved ornaments draw themselves in when their section reveals:
+   stems trace their path, then the leaves and blooms breathe in. */
+.reveal .draw-stem {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+.reveal.is-visible .draw-stem {
+  animation: draw-stem 1600ms var(--ease-out-quint) 150ms forwards;
+}
+.reveal .draw-leaves {
+  opacity: 0;
+}
+.reveal.is-visible .draw-leaves {
+  animation: fade-soft 900ms var(--ease-out-quint) 700ms forwards;
+}
+@keyframes draw-stem {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes fade-soft {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .reveal {
+  .reveal,
+  .reveal.stagger > *,
+  .reveal .stagger-item,
+  .reveal .hero-orn,
+  .reveal .draw-leaves {
     opacity: 1;
     transform: none;
     transition: none;
+    animation: none;
+  }
+  .reveal .draw-stem {
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
+    animation: none;
   }
   html {
     scroll-behavior: auto;
@@ -161,6 +263,29 @@ body {
 }
 @media (prefers-reduced-motion: reduce) {
   .bob { animation: none; }
+}
+
+/* Scroll-scrubbed video intro: 300vh track with a pinned viewport-high stage.
+   Reduced motion collapses it to a static banner via CSS (no JS branch flash). */
+.intro-track {
+  height: 300vh;
+}
+.intro-sticky {
+  position: sticky;
+  height: 100vh;
+  height: 100svh;
+}
+@media (prefers-reduced-motion: reduce) {
+  .intro-track {
+    height: 70vh;
+  }
+  .intro-sticky {
+    position: static;
+    height: 70vh;
+  }
+  .intro-hint {
+    display: none;
+  }
 }
 
 /* Underline inputs (invitation register, not SaaS boxes) */

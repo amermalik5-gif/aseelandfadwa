@@ -6,10 +6,12 @@ export function Reveal({
   children,
   className,
   delay = 0,
+  stagger = false,
 }: {
   children: React.ReactNode;
   className?: string;
   delay?: number;
+  stagger?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -34,7 +36,7 @@ export function Reveal({
   return (
     <div
       ref={ref}
-      className={`reveal ${className ?? ""}`}
+      className={`reveal ${stagger ? "stagger" : ""} ${className ?? ""}`}
       style={delay ? { transitionDelay: `${delay}ms` } : undefined}
     >
       {children}

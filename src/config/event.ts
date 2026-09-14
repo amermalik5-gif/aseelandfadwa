@@ -63,7 +63,7 @@ export const waMessageDefault = `نتشرف بدعوتكم لحضور حفل ز�
 
 export const reminderMessageDefault = `نذكّركم بلطف بتأكيد حضوركم حفل زفاف
 أصيل و فدوى ♡
-يرجى تأكيد الحضور قبل ١١ تشرين الأول من خلال الرابط أدناه.
+يرجى تأكيد الحضور قبل ١١ أكتوبر من خلال الرابط أدناه.
 {link}`;
 
 export const eventDate = new Date(event.dateISO);
