@@ -38,10 +38,13 @@ export async function InvitePage({
   locale,
   invitation,
   existingRsvp,
+  generic = false,
 }: {
   locale: string;
   invitation: Invitation;
   existingRsvp: ExistingRsvp;
+  /** Shareable invitation with no RSVP button or section. */
+  generic?: boolean;
 }) {
   const t = await getTranslations();
   const ar = locale === "ar";
@@ -127,13 +130,15 @@ export async function InvitePage({
             {t("hero.invite")}
           </p>
 
-          <a
-            href="#rsvp"
-            className="stagger-item tracked mt-10 inline-block min-w-44 bg-olive-700 px-8 py-3.5 text-sm text-cream transition-opacity hover:opacity-90"
-            style={d(1200)}
-          >
-            {t("hero.rsvp")}
-          </a>
+          {!generic && (
+            <a
+              href="#rsvp"
+              className="stagger-item tracked mt-10 inline-block min-w-44 bg-olive-700 px-8 py-3.5 text-sm text-cream transition-opacity hover:opacity-90"
+              style={d(1200)}
+            >
+              {t("hero.rsvp")}
+            </a>
+          )}
         </Reveal>
 
         <a
@@ -280,42 +285,44 @@ export async function InvitePage({
       </section>
 
       {/* ── RSVP ──────────────────────────────────────────── */}
-      <section id="rsvp" className="grain bg-ivory-50 px-6 py-20 sm:py-28">
-        <Reveal stagger className="mx-auto flex w-full max-w-lg flex-col items-center gap-8">
-          <h2 className="tracked text-sm text-ink-soft">{t("rsvp.title")}</h2>
+      {!generic && (
+        <section id="rsvp" className="grain bg-ivory-50 px-6 py-20 sm:py-28">
+          <Reveal stagger className="mx-auto flex w-full max-w-lg flex-col items-center gap-8">
+            <h2 className="tracked text-sm text-ink-soft">{t("rsvp.title")}</h2>
 
-          {invitation ? (
-            <>
-              <div className="text-center">
-                <p className="text-sm text-ink-soft">{t("rsvp.greeting")}</p>
-                <p className="type-display mt-1 text-4xl text-ink sm:text-5xl">
-                  {invitation.name}
+            {invitation ? (
+              <>
+                <div className="text-center">
+                  <p className="text-sm text-ink-soft">{t("rsvp.greeting")}</p>
+                  <p className="type-display mt-1 text-4xl text-ink sm:text-5xl">
+                    {invitation.name}
+                  </p>
+                  <p className="mt-3 text-base text-ink-soft">
+                    {t("rsvp.allowance", {
+                      count: invitation.maxGuests,
+                      countDisplay: localizeNumber(locale, invitation.maxGuests),
+                    })}
+                  </p>
+                </div>
+                <p className="text-center text-base text-ink-soft">
+                  {t("rsvp.deadline", { date: formatDeadline(locale) })}
                 </p>
-                <p className="mt-3 text-base text-ink-soft">
-                  {t("rsvp.allowance", {
-                    count: invitation.maxGuests,
-                    countDisplay: localizeNumber(locale, invitation.maxGuests),
-                  })}
-                </p>
-              </div>
-              <p className="text-center text-base text-ink-soft">
-                {t("rsvp.deadline", { date: formatDeadline(locale) })}
+                <FloralDivider className="w-44" />
+                <RsvpForm
+                  code={invitation.code}
+                  maxGuests={invitation.maxGuests}
+                  existing={existingRsvp}
+                  closed={rsvpClosed()}
+                />
+              </>
+            ) : (
+              <p className="max-w-md text-center text-lg leading-relaxed text-ink-soft">
+                {t("rsvp.noCode")}
               </p>
-              <FloralDivider className="w-44" />
-              <RsvpForm
-                code={invitation.code}
-                maxGuests={invitation.maxGuests}
-                existing={existingRsvp}
-                closed={rsvpClosed()}
-              />
-            </>
-          ) : (
-            <p className="max-w-md text-center text-lg leading-relaxed text-ink-soft">
-              {t("rsvp.noCode")}
-            </p>
-          )}
-        </Reveal>
-      </section>
+            )}
+          </Reveal>
+        </section>
+      )}
 
       {/* ── Footer: back to olive ─────────────────────────── */}
       <footer className="bg-olive-900 px-6 py-14 text-center text-cream">
