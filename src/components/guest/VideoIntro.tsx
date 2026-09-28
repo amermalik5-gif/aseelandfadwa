@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
-const SRC = "/intro.mp4";
+const SRC = "/intro.mp4?v=2";
 const SCRUB_END = 0.8; // first 80% of the track maps onto the full video
 const FADE_START = 0.85; // last 15% fades/scales the video away
 
