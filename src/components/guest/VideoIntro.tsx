@@ -121,7 +121,7 @@ export function VideoIntro() {
           className="intro-hint absolute bottom-6 left-0 right-0 flex flex-col items-center gap-1 text-ink-soft/90 transition-opacity duration-500"
           aria-hidden="true"
         >
-          <span className="tracked text-[9px]">{t("scroll")}</span>
+          <span className="tracked text-xs">{t("scroll")}</span>
           <svg viewBox="0 0 16 16" className="bob size-4" fill="none">
             <path
               d="M3 6l5 5 5-5"

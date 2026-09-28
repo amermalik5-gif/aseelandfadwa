@@ -35,10 +35,10 @@
   "countdown": {
     "title": "ليلة العمر",
     "subtitle": "لم يتبقَّ سوى القليل",
-    "days": "يوم",
-    "hours": "ساعة",
-    "minutes": "دقيقة",
-    "seconds": "ثانية",
+    "days": "أيام",
+    "hours": "ساعات",
+    "minutes": "دقائق",
+    "seconds": "ثوانٍ",
     "closing": "بانتظار مشاركتكم لنا هذه الفرحة"
   },
   "rsvp": {
@@ -50,8 +50,6 @@
     "mobileInvalid": "يرجى إدخال رقم هاتف صحيح",
     "allowance": "هذه الدعوة تتسع {count, plural, one {لضيف واحد} two {لضيفين} few {لـ {countDisplay} ضيوف} many {لـ {countDisplay} ضيفًا} other {لـ {countDisplay} ضيف}}",
     "countLabel": "عدد الحضور",
-    "countLess": "تقليل العدد",
-    "countMore": "زيادة العدد",
     "yes": "نعم، سنلبّي الدعوة",
     "no": "نعتذر عن الحضور",
     "chooseAnswer": "يرجى اختيار الإجابة",

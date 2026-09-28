@@ -55,9 +55,10 @@
   --color-beige-300: var(--beige-300);
   --color-beige-400: var(--beige-400);
 
-  --font-serif-display: var(--font-marcellus), var(--font-amiri), serif;
-  --font-script: var(--font-great-vibes), var(--font-aref-ruqaa), cursive;
-  --font-body: var(--font-tajawal), system-ui, sans-serif;
+  /* One family everywhere: Amiri (next/font adds the "Amiri Fallback" face) */
+  --font-serif-display: var(--font-amiri), serif;
+  --font-script: var(--font-amiri), serif;
+  --font-body: var(--font-amiri), serif;
 
   --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -73,22 +74,10 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* English display type: Marcellus. Arabic display swaps to Amiri via :lang. */
-.type-display {
-  font-family: var(--font-marcellus), serif;
-}
-:lang(ar) .type-display,
-.type-display:lang(ar) {
-  font-family: var(--font-amiri), serif;
-}
-
-/* Couple names: Great Vibes (en) / Aref Ruqaa (ar) */
+/* Display lines and the couple's names share the body family (Amiri) */
+.type-display,
 .type-names {
-  font-family: var(--font-great-vibes), cursive;
-}
-:lang(ar) .type-names,
-.type-names:lang(ar) {
-  font-family: var(--font-aref-ruqaa), serif;
+  font-family: var(--font-amiri), serif;
 }
 
 /* Letter-spaced caps read wrong in Arabic; drop tracking there */
@@ -296,7 +285,7 @@ body {
   border-bottom: 1px solid color-mix(in oklab, var(--ink-soft) 55%, transparent);
   border-radius: 0;
   padding: 0.625rem 0;
-  font-size: 1rem;
+  font-size: 1.125rem;
   color: var(--ink);
   transition: border-color 200ms var(--ease-out-quint), box-shadow 200ms var(--ease-out-quint);
 }

@@ -33,19 +33,23 @@ export function Countdown({ targetMs }: { targetMs: number }) {
     ["seconds", now?.seconds ?? 0],
   ] as const;
 
+  // Explicit RTL: days sit on the right and read first, seconds on the left.
+  // Each unit is its own box so the digits never run together into one number.
   return (
-    <div className="grid grid-cols-4 gap-2 sm:gap-6">
+    <div dir="rtl" className="grid w-full max-w-sm grid-cols-4 gap-2.5 sm:gap-4">
       {units.map(([key, value]) => (
-        <div key={key} className="flex flex-col items-center gap-1.5">
+        <div
+          key={key}
+          className="flex flex-col items-center gap-1 border border-beige-400/70 bg-paper/60 px-1 py-3"
+        >
           <span
-            className="type-display min-w-[2ch] text-center text-4xl tabular-nums text-ink sm:text-5xl"
+            className="type-display text-center text-4xl leading-none tabular-nums text-ink sm:text-5xl"
+            style={{ unicodeBidi: "isolate" }}
             aria-hidden={now === null}
           >
             {localizeNumber(locale, value)}
           </span>
-          <span className="tracked text-[10px] text-ink-soft sm:text-xs">
-            {t(key)}
-          </span>
+          <span className="text-base text-ink-soft">{t(key)}</span>
         </div>
       ))}
     </div>

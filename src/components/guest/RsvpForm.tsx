@@ -86,7 +86,7 @@ export function RsvpForm({
 
   if (closed && !showSummary) {
     return (
-      <p className="mx-auto max-w-md text-center text-base leading-relaxed text-ink-soft">
+      <p className="mx-auto max-w-md text-center text-lg leading-relaxed text-ink-soft">
         {t("closed")}
       </p>
     );
@@ -95,11 +95,11 @@ export function RsvpForm({
   if (showSummary && saved) {
     return (
       <div className="mx-auto flex max-w-md flex-col items-center gap-6 text-center">
-        <p className="text-lg leading-relaxed text-ink">
+        <p className="text-xl leading-relaxed text-ink">
           {saved.attending ? t("thanksYes") : t("thanksNo")}
         </p>
         {saved.attending && (
-          <p className="text-sm text-ink-soft">
+          <p className="text-base text-ink-soft">
             {t("countLabel")}: {localizeNumber(locale, saved.guestCount ?? maxGuests)}
           </p>
         )}
@@ -112,7 +112,7 @@ export function RsvpForm({
               setCount(saved.guestCount ?? maxGuests);
               setMobile(saved.mobile ?? "");
             }}
-            className="tracked border-b border-brass pb-0.5 text-xs text-ink-soft transition-colors hover:text-ink"
+            className="tracked border-b border-brass pb-0.5 text-sm text-ink-soft transition-colors hover:text-ink"
           >
             {t("edit")}
           </button>
@@ -130,7 +130,7 @@ export function RsvpForm({
           role="radio"
           aria-checked={attending === true}
           onClick={() => setAttending(true)}
-          className={`min-h-12 border px-4 py-3 text-sm transition-colors ${
+          className={`min-h-12 border px-4 py-3 text-base transition-colors ${
             attending === true
               ? "border-olive-700 bg-olive-700 text-cream"
               : "border-olive-700/40 bg-transparent text-ink hover:border-olive-700"
@@ -143,7 +143,7 @@ export function RsvpForm({
           role="radio"
           aria-checked={attending === false}
           onClick={() => setAttending(false)}
-          className={`min-h-12 border px-4 py-3 text-sm transition-colors ${
+          className={`min-h-12 border px-4 py-3 text-base transition-colors ${
             attending === false
               ? "border-olive-700 bg-olive-700 text-cream"
               : "border-olive-700/40 bg-transparent text-ink hover:border-olive-700"
@@ -155,33 +155,38 @@ export function RsvpForm({
 
       {attending === true && maxGuests > 1 && (
         <div className="flex flex-col items-center gap-3">
-          <span className="tracked text-[11px] text-ink-soft">
+          <span className="tracked text-sm text-ink-soft">
             {t("countLabel")}
           </span>
-          <div className="flex items-center gap-6">
-            <button
-              type="button"
-              onClick={() => setCount((c) => Math.max(1, c - 1))}
-              disabled={count <= 1}
-              aria-label={t("countLess")}
-              className="flex size-12 items-center justify-center border border-olive-700/40 text-xl text-ink transition-colors hover:border-olive-700 disabled:opacity-30"
-            >
-              −
-            </button>
-            <span className="type-display min-w-[2ch] text-center text-4xl tabular-nums text-ink">
-              {localizeNumber(locale, count)}
-            </span>
-            <button
-              type="button"
-              onClick={() => setCount((c) => Math.min(maxGuests, c + 1))}
-              disabled={count >= maxGuests}
-              aria-label={t("countMore")}
-              className="flex size-12 items-center justify-center border border-olive-700/40 text-xl text-ink transition-colors hover:border-olive-700 disabled:opacity-30"
-            >
-              +
-            </button>
+          <div
+            role="radiogroup"
+            aria-label={t("countLabel")}
+            className="grid justify-center gap-2.5"
+            style={{
+              // balanced rows: 6 seats → 3 + 3, 8 → 4 + 4, never more than 5 across
+              gridTemplateColumns: `repeat(${
+                maxGuests <= 5 ? maxGuests : Math.min(5, Math.ceil(maxGuests / 2))
+              }, 3.5rem)`,
+            }}
+          >
+            {Array.from({ length: maxGuests }, (_, i) => i + 1).map((n) => (
+              <button
+                key={n}
+                type="button"
+                role="radio"
+                aria-checked={count === n}
+                onClick={() => setCount(n)}
+                className={`type-display flex size-14 items-center justify-center border text-2xl tabular-nums transition-colors ${
+                  count === n
+                    ? "border-olive-700 bg-olive-700 text-cream"
+                    : "border-olive-700/40 text-ink hover:border-olive-700"
+                }`}
+              >
+                {localizeNumber(locale, n)}
+              </button>
+            ))}
           </div>
-          <span className="text-xs text-ink-soft">
+          <span className="text-sm text-ink-soft">
             {t("allowance", {
               count: maxGuests,
               countDisplay: localizeNumber(locale, maxGuests),
@@ -191,7 +196,7 @@ export function RsvpForm({
       )}
 
       <label className="flex flex-col gap-1.5">
-        <span className="tracked text-[11px] text-ink-soft">
+        <span className="tracked text-sm text-ink-soft">
           {t("mobile")}{" "}
           <span className="normal-case tracking-normal opacity-70">
             ({t("optional")})
@@ -210,7 +215,7 @@ export function RsvpForm({
       </label>
 
       {error && (
-        <p role="alert" className="text-center text-sm text-clay">
+        <p role="alert" className="text-center text-base text-clay">
           {error}
         </p>
       )}
@@ -218,7 +223,7 @@ export function RsvpForm({
       <button
         type="submit"
         disabled={busy}
-        className="tracked min-h-13 w-full bg-olive-700 px-6 py-4 text-sm text-cream transition-opacity hover:opacity-90 disabled:opacity-50"
+        className="tracked min-h-13 w-full bg-olive-700 px-6 py-4 text-base text-cream transition-opacity hover:opacity-90 disabled:opacity-50"
       >
         {busy ? t("sending") : t("confirm")}
       </button>

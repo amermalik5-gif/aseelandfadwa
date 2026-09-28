@@ -17,7 +17,6 @@ import {
 
 const d = (ms: number) => ({ "--d": `${ms}ms` }) as React.CSSProperties;
 import { Reveal } from "./Reveal";
-import { LangToggle } from "./LangToggle";
 import { MusicToggle } from "./MusicToggle";
 import { Countdown } from "./Countdown";
 import { RsvpForm } from "./RsvpForm";
@@ -51,7 +50,6 @@ export async function InvitePage({
 
   return (
     <main className="min-h-svh">
-      <LangToggle />
       <MusicToggle />
 
       {/* ── Scroll-scrubbed video intro ───────────────────── */}
@@ -93,7 +91,7 @@ export async function InvitePage({
           </div>
 
           <p
-            className="stagger-item tracked-wide mt-7 text-[11px] text-ink-soft sm:text-xs"
+            className="stagger-item tracked-wide mt-7 text-sm text-ink-soft sm:text-sm"
             style={d(380)}
           >
             {t("hero.tagline")}
@@ -104,7 +102,7 @@ export async function InvitePage({
           </div>
 
           <p
-            className="stagger-item type-display mt-3 text-lg text-ink sm:text-2xl"
+            className="stagger-item type-display mt-3 text-xl text-ink sm:text-3xl"
             style={d(700)}
           >
             {dateLine}
@@ -123,7 +121,7 @@ export async function InvitePage({
           </h1>
 
           <p
-            className="stagger-item tracked mt-8 max-w-xs text-[11px] leading-loose text-ink-soft sm:max-w-none sm:text-xs"
+            className="stagger-item tracked mt-8 max-w-xs text-sm leading-loose text-ink-soft sm:max-w-none sm:text-sm"
             style={d(1040)}
           >
             {t("hero.invite")}
@@ -131,7 +129,7 @@ export async function InvitePage({
 
           <a
             href="#rsvp"
-            className="stagger-item tracked mt-10 inline-block min-w-44 bg-olive-700 px-8 py-3.5 text-xs text-cream transition-opacity hover:opacity-90"
+            className="stagger-item tracked mt-10 inline-block min-w-44 bg-olive-700 px-8 py-3.5 text-sm text-cream transition-opacity hover:opacity-90"
             style={d(1200)}
           >
             {t("hero.rsvp")}
@@ -143,7 +141,7 @@ export async function InvitePage({
           aria-label={t("hero.scroll")}
           className="absolute bottom-6 left-0 right-0 mx-auto flex w-fit flex-col items-center gap-1 text-ink-soft/80"
         >
-          <span className="tracked text-[9px]">{t("hero.scroll")}</span>
+          <span className="tracked text-xs">{t("hero.scroll")}</span>
           <svg viewBox="0 0 16 16" className="bob size-4" fill="none" aria-hidden="true">
             <path d="M3 6l5 5 5-5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
           </svg>
@@ -153,20 +151,20 @@ export async function InvitePage({
       {/* ── Details: ivory day ────────────────────────────── */}
       <section id="details" className="grain bg-ivory-50 px-6 py-20 sm:py-28">
         <Reveal stagger className="mx-auto flex max-w-lg flex-col items-center gap-8 text-center">
-          <h2 className="tracked text-xs text-ink-soft">{t("details.title")}</h2>
+          <h2 className="tracked text-sm text-ink-soft">{t("details.title")}</h2>
 
           <div>
-            <p className="type-display text-3xl text-ink sm:text-4xl">
+            <p className="type-display text-4xl text-ink sm:text-5xl">
               {ar ? event.venueAr : event.venueEn}
             </p>
-            <p className="mt-2 text-sm text-ink-soft">
+            <p className="mt-2 text-base text-ink-soft">
               {ar ? event.venueAreaAr : event.venueAreaEn}
             </p>
           </div>
 
           <FloralDivider className="w-56" />
 
-          <div className="type-display flex items-center justify-center gap-5 text-lg text-ink sm:text-xl">
+          <div className="type-display flex items-center justify-center gap-5 text-xl text-ink sm:text-2xl">
             <span>{formatEventDate(locale)}</span>
             <span className="h-5 w-px bg-brass/40" aria-hidden="true" />
             <span>{formatEventWeekday(locale)}</span>
@@ -176,7 +174,7 @@ export async function InvitePage({
 
           <a
             href={`/api/ics?lang=${locale}`}
-            className="tracked mt-2 min-h-12 w-full max-w-xs border border-olive-700/50 px-6 py-3.5 text-center text-[11px] text-ink transition-colors hover:border-olive-700 hover:bg-olive-700 hover:text-cream sm:w-auto"
+            className="tracked mt-2 min-h-12 w-full max-w-xs border border-olive-700/50 px-6 py-3.5 text-center text-sm text-ink transition-colors hover:border-olive-700 hover:bg-olive-700 hover:text-cream sm:w-auto"
           >
             {t("details.calendar")}
           </a>
@@ -186,12 +184,12 @@ export async function InvitePage({
       {/* ── Location ──────────────────────────────────────── */}
       <section className="grain bg-ivory-100 px-6 py-20 sm:py-24">
         <Reveal stagger className="mx-auto flex max-w-lg flex-col items-center gap-6 text-center">
-          <h2 className="tracked text-xs text-ink-soft">{t("location.title")}</h2>
+          <h2 className="tracked text-sm text-ink-soft">{t("location.title")}</h2>
           <div>
-            <p className="type-display text-3xl text-ink sm:text-4xl">
+            <p className="type-display text-4xl text-ink sm:text-5xl">
               {ar ? event.venueAr : event.venueEn}
             </p>
-            <p className="mt-2 text-sm text-ink-soft">
+            <p className="mt-2 text-base text-ink-soft">
               {ar ? event.venueAreaAr : event.venueAreaEn}
             </p>
           </div>
@@ -199,7 +197,7 @@ export async function InvitePage({
             href={event.mapsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="tracked flex min-h-14 w-full max-w-md items-center justify-center bg-olive-700 px-6 py-4 text-xs text-cream transition-opacity hover:opacity-90"
+            className="tracked flex min-h-14 w-full max-w-md items-center justify-center bg-olive-700 px-6 py-4 text-sm text-cream transition-opacity hover:opacity-90"
           >
             {t("location.button")}
           </a>
@@ -209,7 +207,7 @@ export async function InvitePage({
       {/* ── Agenda: wedding-day timeline ──────────────────── */}
       <section className="grain bg-ivory-50 px-6 py-20 sm:py-28">
         <Reveal className="mx-auto w-full max-w-lg">
-          <h2 className="tracked text-center text-xs text-ink-soft">
+          <h2 className="tracked text-center text-sm text-ink-soft">
             {t("agenda.title")}
           </h2>
           <ol className="mx-auto mt-12 w-fit min-w-64">
@@ -229,20 +227,20 @@ export async function InvitePage({
                     />
                   )}
                   <Bloom className="absolute start-0 top-1.5 size-[18px]" />
-                  <p className="type-display text-2xl text-ink">
+                  <p className="type-display text-3xl text-ink">
                     {formatAgendaTime(locale, stop.time)}
                   </p>
-                  <p className="mt-1.5 text-base font-medium text-ink">
+                  <p className="mt-1.5 text-lg font-medium text-ink">
                     {t(`agenda.stops.${stop.key}`)}
                   </p>
                   {area && (
-                    <p className="mt-0.5 text-sm text-ink-soft">{area}</p>
+                    <p className="mt-0.5 text-base text-ink-soft">{area}</p>
                   )}
                   <a
                     href={stop.mapsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="tracked mt-3 inline-block border-b border-brass pb-0.5 text-[11px] text-ink-soft transition-colors hover:text-ink"
+                    className="tracked mt-3 inline-block border-b border-brass pb-0.5 text-sm text-ink-soft transition-colors hover:text-ink"
                   >
                     {t("agenda.map")}
                   </a>
@@ -256,12 +254,12 @@ export async function InvitePage({
       {/* ── Countdown ─────────────────────────────────────── */}
       <section className="grain bg-ivory-100 px-6 py-20 sm:py-24">
         <Reveal stagger className="mx-auto flex max-w-lg flex-col items-center gap-8 text-center">
-          <h2 className="tracked text-xs text-ink-soft">{t("countdown.title")}</h2>
-          <p className="type-display text-2xl text-ink sm:text-3xl">
+          <h2 className="tracked text-sm text-ink-soft">{t("countdown.title")}</h2>
+          <p className="type-display text-3xl text-ink sm:text-4xl">
             {t("countdown.subtitle")}
           </p>
           <Countdown targetMs={eventDate.getTime()} />
-          <p className="text-sm leading-relaxed text-ink-soft">
+          <p className="text-base leading-relaxed text-ink-soft">
             {t("countdown.closing")}
           </p>
         </Reveal>
@@ -270,37 +268,37 @@ export async function InvitePage({
       {/* ── A kind note: adults-only ──────────────────────── */}
       <section className="bg-olive-900 px-6 py-16 text-center text-cream sm:py-20">
         <Reveal stagger className="mx-auto flex max-w-md flex-col items-center gap-5">
-          <p className="tracked text-[11px] text-cream-dim">
+          <p className="tracked text-sm text-cream-dim">
             {t("children.kicker")}
           </p>
           <SmallSpray tone="cream" className="w-44" />
-          <p className="text-base leading-loose text-cream/95">
+          <p className="text-lg leading-loose text-cream/95">
             {t("children.body")}
           </p>
-          <p className="text-xs text-cream-dim">{t("children.thanks")}</p>
+          <p className="text-sm text-cream-dim">{t("children.thanks")}</p>
         </Reveal>
       </section>
 
       {/* ── RSVP ──────────────────────────────────────────── */}
       <section id="rsvp" className="grain bg-ivory-50 px-6 py-20 sm:py-28">
         <Reveal stagger className="mx-auto flex w-full max-w-lg flex-col items-center gap-8">
-          <h2 className="tracked text-xs text-ink-soft">{t("rsvp.title")}</h2>
+          <h2 className="tracked text-sm text-ink-soft">{t("rsvp.title")}</h2>
 
           {invitation ? (
             <>
               <div className="text-center">
-                <p className="text-xs text-ink-soft">{t("rsvp.greeting")}</p>
-                <p className="type-display mt-1 text-3xl text-ink sm:text-4xl">
+                <p className="text-sm text-ink-soft">{t("rsvp.greeting")}</p>
+                <p className="type-display mt-1 text-4xl text-ink sm:text-5xl">
                   {invitation.name}
                 </p>
-                <p className="mt-3 text-sm text-ink-soft">
+                <p className="mt-3 text-base text-ink-soft">
                   {t("rsvp.allowance", {
                     count: invitation.maxGuests,
                     countDisplay: localizeNumber(locale, invitation.maxGuests),
                   })}
                 </p>
               </div>
-              <p className="text-center text-sm text-ink-soft">
+              <p className="text-center text-base text-ink-soft">
                 {t("rsvp.deadline", { date: formatDeadline(locale) })}
               </p>
               <FloralDivider className="w-44" />
@@ -312,7 +310,7 @@ export async function InvitePage({
               />
             </>
           ) : (
-            <p className="max-w-md text-center text-base leading-relaxed text-ink-soft">
+            <p className="max-w-md text-center text-lg leading-relaxed text-ink-soft">
               {t("rsvp.noCode")}
             </p>
           )}
@@ -322,10 +320,10 @@ export async function InvitePage({
       {/* ── Footer: back to olive ─────────────────────────── */}
       <footer className="bg-olive-900 px-6 py-14 text-center text-cream">
         <SmallSpray tone="cream" className="mx-auto w-48" />
-        <p className="type-names mt-4 text-3xl">
+        <p className="type-names mt-4 text-4xl">
           {ar ? "أصيل وفدوى" : "Aseel & Fadwa"}
         </p>
-        <p className="tracked mt-3 text-[10px] text-cream-dim">
+        <p className="tracked mt-3 text-sm text-cream-dim">
           {formatEventDate(locale)}
         </p>
       </footer>
