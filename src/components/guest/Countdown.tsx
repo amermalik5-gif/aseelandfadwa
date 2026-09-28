@@ -33,10 +33,10 @@ export function Countdown({ targetMs }: { targetMs: number }) {
     ["seconds", now?.seconds ?? 0],
   ] as const;
 
-  // Explicit RTL: days sit on the right and read first, seconds on the left.
+  // Explicit LTR: days sit on the left, seconds on the right (clock order).
   // Each unit is its own box so the digits never run together into one number.
   return (
-    <div dir="rtl" className="grid w-full max-w-sm grid-cols-4 gap-2.5 sm:gap-4">
+    <div dir="ltr" className="grid w-full max-w-sm grid-cols-4 gap-2.5 sm:gap-4">
       {units.map(([key, value]) => (
         <div
           key={key}
