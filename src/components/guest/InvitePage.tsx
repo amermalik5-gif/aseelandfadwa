@@ -88,7 +88,7 @@ export async function InvitePage({
 
           <div className="stagger-item" style={d(200)}>
             <Monogram
-              initials={ar ? "أ · ف" : "A · F"}
+              initials={ar ? "ف · أ" : "A · F"}
               className="mx-auto w-20 sm:w-24"
             />
           </div>
