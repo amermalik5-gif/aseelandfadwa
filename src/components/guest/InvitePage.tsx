@@ -88,9 +88,9 @@ export async function InvitePage({
           <div className="stagger-item" style={d(200)}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/art/names.png"
+              src="/art/monogram.png"
               alt={ar ? "أصيل وفدوى" : "Aseel & Fadwa"}
-              className="mx-auto w-56 sm:w-72"
+              className="mx-auto h-40 w-auto sm:h-48"
             />
           </div>
 
