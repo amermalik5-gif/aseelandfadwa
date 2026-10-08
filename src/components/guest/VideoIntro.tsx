@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 const SRC = "/intro.mp4?v=2";
 const SCRUB_END = 0.8; // first 80% of the track maps onto the full video
 const FADE_START = 0.85; // last 15% fades/scales the video away
+const LOGO_FADE_END = 0.12; // logo is fully gone after the first 12%
 
 export function VideoIntro() {
   const t = useTranslations("hero");
@@ -13,6 +14,7 @@ export function VideoIntro() {
   const sectionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const hintRef = useRef<HTMLDivElement>(null);
+  const logoRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -71,6 +73,15 @@ export function VideoIntro() {
       video.style.transform = `scale(${1 - 0.08 * f})`;
       video.style.borderRadius = `${28 * f}px`;
 
+      // Logo sits over the opening (background-only) frame and drifts away
+      // as soon as the guest starts scrolling.
+      if (logoRef.current) {
+        const l = Math.min(1, p / LOGO_FADE_END);
+        logoRef.current.style.opacity = String(1 - l);
+        logoRef.current.style.transform = `translateY(${-24 * l}px) scale(${1 - 0.06 * l})`;
+        logoRef.current.style.visibility = l >= 1 ? "hidden" : "visible";
+      }
+
       if (hintRef.current) {
         hintRef.current.style.opacity = p > 0.05 ? "0" : "1";
       }
@@ -116,6 +127,18 @@ export function VideoIntro() {
           className="h-full w-full object-cover"
           style={{ willChange: "transform, opacity" }}
         />
+        <div
+          ref={logoRef}
+          className="pointer-events-none absolute inset-0 flex items-center justify-center pb-[8vh]"
+          style={{ willChange: "transform, opacity" }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/art/logo.png"
+            alt={locale === "ar" ? "أصيل و فدوى" : "Aseel & Fadwa"}
+            className="h-[46vh] max-h-[460px] w-auto max-w-[62vw] object-contain"
+          />
+        </div>
         <div
           ref={hintRef}
           className="intro-hint absolute bottom-6 left-0 right-0 flex flex-col items-center gap-1 text-ink-soft/90 transition-opacity duration-500"
