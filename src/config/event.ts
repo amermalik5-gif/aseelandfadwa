@@ -9,7 +9,7 @@ export const event = {
   siteNameAr: "أصيل وفدوى",
 
   // Event start, Amman time (UTC+3)
-  dateISO: "2026-10-16T20:00:00+03:00",
+  dateISO: "2026-10-16T19:30:00+03:00",
   timeZone: "Asia/Amman",
 
   // RSVP allowed until the end of this day (Amman time)
@@ -40,7 +40,7 @@ export const event = {
     },
     {
       key: "venue",
-      time: "20:00",
+      time: "19:30",
       mapsUrl: "https://maps.app.goo.gl/XVhXm2447mQXHVf1A",
       areaAr: "طريق المطار، عمّان",
       areaEn: "Airport Road, Amman",
