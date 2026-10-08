@@ -11,7 +11,6 @@ import {
 import {
   Bloom,
   FloralDivider,
-  Monogram,
   SmallSpray,
 } from "./FloralOrnament";
 
@@ -87,9 +86,11 @@ export async function InvitePage({
           </div>
 
           <div className="stagger-item" style={d(200)}>
-            <Monogram
-              initials={ar ? "ف · أ" : "A · F"}
-              className="mx-auto w-20 sm:w-24"
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/art/names.png"
+              alt={ar ? "أصيل وفدوى" : "Aseel & Fadwa"}
+              className="mx-auto w-56 sm:w-72"
             />
           </div>
 
